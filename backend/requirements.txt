@@ -1,0 +1,12 @@
+# Backend Core runtime dependencies (Python 3.11 / Windows compatible)
+fastapi==0.116.1
+starlette==0.47.3
+uvicorn==0.35.0
+pydantic==2.11.7
+pydantic-core==2.33.2
+sqlalchemy==2.0.43
+python-multipart==0.0.20
+
+# API test dependencies
+httpx==0.28.1
+pytest==8.4.1
