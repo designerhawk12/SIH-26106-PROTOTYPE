@@ -1,0 +1,182 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * SENTINEL — premium dark cybersecurity design system.
+ *
+ * All colors live here as CSS variables and are exposed to Tailwind through
+ * @theme inline. Change a value here to re-theme the entire product.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-dim: var(--accent-dim);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-network: var(--network);
+  --color-ai: var(--ai);
+
+  /* shadcn compatibility aliases */
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-foreground);
+  --color-secondary: var(--surface-hover);
+  --color-secondary-foreground: var(--foreground);
+  --color-accent-hover: var(--surface-hover);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--foreground);
+  --color-input: var(--border);
+  --color-ring: var(--accent);
+
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --radius: 0.375rem;
+
+  --background: oklch(0.13 0 0);
+  --foreground: oklch(0.97 0 0);
+  --surface: oklch(0.165 0 0);
+  --surface-hover: oklch(0.205 0 0);
+  --surface-raised: oklch(0.19 0 0);
+  --border: oklch(0.26 0 0);
+  --border-strong: oklch(0.34 0 0);
+  --muted: oklch(0.24 0 0);
+  --muted-foreground: oklch(0.65 0.005 265);
+
+  --accent: oklch(0.92 0.21 118);
+  --accent-foreground: oklch(0.13 0 0);
+  --accent-dim: oklch(0.6 0.14 118);
+
+  --danger: oklch(0.63 0.24 27);
+  --warning: oklch(0.78 0.17 62);
+  --success: oklch(0.78 0.19 148);
+  --network: oklch(0.82 0.14 195);
+  --ai: oklch(0.72 0.24 330);
+
+  --shadow-panel: 0 1px 0 0 oklch(1 0 0 / 3%) inset, 0 12px 30px -18px oklch(0 0 0 / 90%);
+  --glow-accent: 0 0 0 1px oklch(0.92 0.21 118 / 22%), 0 12px 40px -18px oklch(0.92 0.21 118 / 40%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 999px;
+    border: 3px solid var(--background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+  }
+}
+
+/* --- Technical background textures -------------------------------------- */
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 3.5%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 3.5%) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility bg-dots {
+  background-image: radial-gradient(oklch(1 0 0 / 6%) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@utility bg-noise {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@utility glow-accent {
+  box-shadow: var(--glow-accent);
+}
+
+@utility text-accent-glow {
+  text-shadow: 0 0 22px oklch(0.92 0.21 118 / 35%);
+}
+
+@utility panel {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+@utility scan-line {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.92 0.21 118 / 70%),
+    transparent
+  );
+}
+
+@keyframes sweep-x {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@utility animate-sweep {
+  animation: sweep-x 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
