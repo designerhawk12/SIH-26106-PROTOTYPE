@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Runtime data and evidence
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+reports/
+evidence/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Frontend tooling
+node_modules/
+frontend/dist/
+.vite/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+

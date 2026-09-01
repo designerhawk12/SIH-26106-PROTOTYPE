@@ -1,0 +1,96 @@
+"""Closed vocabularies shared across analysis services."""
+
+from enum import StrEnum
+
+
+class AuthenticationVerdict(StrEnum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+    SOFTFAIL = "SOFTFAIL"
+    NEUTRAL = "NEUTRAL"
+    TEMPERROR = "TEMPERROR"
+    PERMERROR = "PERMERROR"
+    NONE = "NONE"
+    UNKNOWN = "UNKNOWN"
+
+
+class IOCType(StrEnum):
+    IP_ADDRESS = "IP_ADDRESS"
+    URL = "URL"
+    DOMAIN = "DOMAIN"
+    EMAIL_ADDRESS = "EMAIL_ADDRESS"
+    ATTACHMENT_SHA256 = "ATTACHMENT_SHA256"
+
+
+class IOCSource(StrEnum):
+    HEADER = "HEADER"
+    BODY_TEXT = "BODY_TEXT"
+    BODY_HTML = "BODY_HTML"
+    RECEIVED_HEADER = "RECEIVED_HEADER"
+    ATTACHMENT_METADATA = "ATTACHMENT_METADATA"
+
+
+class DetectionCategory(StrEnum):
+    PHISHING = "PHISHING"
+    SOCIAL_ENGINEERING = "SOCIAL_ENGINEERING"
+    URGENCY = "URGENCY"
+    CREDENTIAL_REQUEST = "CREDENTIAL_REQUEST"
+    PAYMENT_REQUEST = "PAYMENT_REQUEST"
+    IMPERSONATION = "IMPERSONATION"
+    BUSINESS_EMAIL_COMPROMISE = "BUSINESS_EMAIL_COMPROMISE"
+    SUSPICIOUS_CALL_TO_ACTION = "SUSPICIOUS_CALL_TO_ACTION"
+
+
+class Severity(StrEnum):
+    INFO = "INFO"
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class ReputationVerdict(StrEnum):
+    MALICIOUS = "MALICIOUS"
+    SUSPICIOUS = "SUSPICIOUS"
+    BENIGN = "BENIGN"
+    UNKNOWN = "UNKNOWN"
+
+
+class EnrichmentStatus(StrEnum):
+    COMPLETE = "COMPLETE"
+    PARTIAL = "PARTIAL"
+    UNAVAILABLE = "UNAVAILABLE"
+    UNKNOWN = "UNKNOWN"
+
+
+class GeoLocationStatus(StrEnum):
+    FOUND = "FOUND"
+    NOT_FOUND = "NOT_FOUND"
+    NOT_PUBLIC = "NOT_PUBLIC"
+    PROVIDER_ERROR = "PROVIDER_ERROR"
+    UNKNOWN = "UNKNOWN"
+
+
+class RiskLevel(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class AnalysisStatus(StrEnum):
+    RECEIVED = "RECEIVED"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    PARTIAL = "PARTIAL"
+    FAILED = "FAILED"
+
+
+class TimelineEventType(StrEnum):
+    MESSAGE_DATE = "MESSAGE_DATE"
+    RECEIVED_HOP = "RECEIVED_HOP"
+    ANALYSIS_STARTED = "ANALYSIS_STARTED"
+    ANALYSIS_COMPLETED = "ANALYSIS_COMPLETED"
+    ENRICHMENT = "ENRICHMENT"
+    FINDING = "FINDING"
+
