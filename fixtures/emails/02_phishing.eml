@@ -1,0 +1,22 @@
+From: Account Security <security@example.org>
+To: Target User <target@example.net>
+Reply-To: Verification Desk <verify@example.net>
+Subject: Action required: verify your mailbox
+Date: Tue, 01 Sep 2026 09:00:00 +0000
+Message-ID: <phishing-02@example.org>
+Authentication-Results: mx.example.net; spf=fail smtp.mailfrom=example.net; dkim=none; dmarc=fail header.from=example.org policy=reject
+Received: from sender.example.net (sender.example.net [8.8.4.4]) by mx.example.net with ESMTP; Tue, 01 Sep 2026 09:01:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="phish-boundary"
+
+--phish-boundary
+Content-Type: text/plain; charset="utf-8"
+
+Verify your account immediately at https://login.example.com/verify?case=42.
+
+--phish-boundary
+Content-Type: text/html; charset="utf-8"
+
+<p>Verify your account immediately.</p><a href="https://login.example.com/verify?case=42">Verify mailbox</a>
+
+--phish-boundary--

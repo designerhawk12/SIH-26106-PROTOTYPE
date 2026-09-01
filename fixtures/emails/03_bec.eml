@@ -1,0 +1,11 @@
+From: Finance Director <finance@example.org>
+To: Accounts Team <accounts@example.net>
+Reply-To: Finance Director <payments@example.net>
+Subject: Updated payment instructions
+Date: Tue, 01 Sep 2026 10:00:00 +0000
+Message-ID: <bec-03@example.org>
+Authentication-Results: mx.example.net; spf=softfail smtp.mailfrom=example.net; dkim=fail header.d=example.net; dmarc=neutral header.from=example.org
+Received: from mail.example.net (mail.example.net [1.1.1.1]) by mx.example.net with ESMTPS; Tue, 01 Sep 2026 10:01:00 +0000
+Content-Type: text/plain; charset="utf-8"
+
+Please update the supplier account details before today's payment run.

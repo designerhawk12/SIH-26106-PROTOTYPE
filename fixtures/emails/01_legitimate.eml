@@ -1,0 +1,28 @@
+From: Alice Example <alice@example.org>
+To: Bob Example <bob@example.net>, Carol Example <carol@example.net>
+Cc: Audit Team <audit@example.net>
+Reply-To: Alice Example <alice@example.org>
+Return-Path: <alice@example.org>
+Subject: Quarterly operations update
+Date: Tue, 01 Sep 2026 08:21:00 +0000
+Message-ID: <legitimate-01@example.org>
+Authentication-Results: mx.example.net; spf=pass smtp.mailfrom=example.org; dkim=pass header.d=example.org; dmarc=pass header.from=example.org
+Received: from relay.example.org (relay.example.org [8.8.8.8]) by mx.example.net with ESMTPS id LEG1 for <bob@example.net>; Tue, 01 Sep 2026 08:22:00 +0000
+Received: from workstation.example.org (10.0.0.12) by relay.example.org with ESMTP; Tue, 01 Sep 2026 08:21:30 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legitimate-boundary"
+
+--legitimate-boundary
+Content-Type: text/plain; charset="utf-8"
+
+Hello Bob,
+
+The quarterly update is available at https://www.example.org/updates.
+Contact operations@example.org with questions.
+
+--legitimate-boundary
+Content-Type: text/html; charset="utf-8"
+
+<p>Hello Bob,</p><p>The quarterly update is available at <a href="https://www.example.org/updates">the operations portal</a>.</p>
+
+--legitimate-boundary--
