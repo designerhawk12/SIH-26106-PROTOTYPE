@@ -1,6 +1,17 @@
-"""Threat-intelligence contracts."""
+"""Provider-neutral threat-intelligence enrichment."""
 
+from .abuseipdb import AbuseIPDBProvider
 from .interfaces import ThreatIntelService
+from .providers import ProviderLookupResult, ProviderLookupStatus, ThreatIntelProvider
+from .service import ThreatIntelEnrichmentService
+from .virustotal import VirusTotalProvider
 
-__all__ = ["ThreatIntelService"]
-
+__all__ = [
+    "AbuseIPDBProvider",
+    "ProviderLookupResult",
+    "ProviderLookupStatus",
+    "ThreatIntelEnrichmentService",
+    "ThreatIntelProvider",
+    "ThreatIntelService",
+    "VirusTotalProvider",
+]
