@@ -1,0 +1,9 @@
+From: Operations Desk <operations@example.org>
+To: On-call Team <oncall@example.net>
+Subject: URGENT: scheduled maintenance requires acknowledgement
+Date: Tue, 01 Sep 2026 14:00:00 +0000
+Message-ID: <urgent-07@example.org>
+Authentication-Results: mx.example.net; spf=pass; dkim=pass header.d=example.org; dmarc=pass
+Content-Type: text/plain; charset="utf-8"
+
+Urgent operational notice: acknowledge the scheduled maintenance window by replying to operations@example.org.

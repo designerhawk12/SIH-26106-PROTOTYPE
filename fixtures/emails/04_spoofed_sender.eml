@@ -1,0 +1,10 @@
+From: Executive Office <executive@example.org>
+To: Staff <staff@example.net>
+Reply-To: Executive Office <helpdesk@example.net>
+Subject: Review required
+Date: Tue, 01 Sep 2026 11:00:00 +0000
+Authentication-Results: mx.example.net; spf=fail; dkim=fail; dmarc=fail
+Received: malformed routing information
+Content-Type: text/plain; charset="utf-8"
+
+Please review the supplied document.

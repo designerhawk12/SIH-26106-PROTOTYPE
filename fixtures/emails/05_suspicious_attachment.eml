@@ -1,0 +1,21 @@
+From: Billing <billing@example.org>
+To: Accounts <accounts@example.net>
+Subject: Invoice copy
+Date: Tue, 01 Sep 2026 12:00:00 +0000
+Message-ID: <attachment-05@example.org>
+Authentication-Results: mx.example.net; spf=pass; dkim=pass; dmarc=pass
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="attachment-boundary"
+
+--attachment-boundary
+Content-Type: text/plain; charset="utf-8"
+
+Please see the attached invoice copy.
+
+--attachment-boundary
+Content-Type: application/octet-stream; name="invoice.exe"
+Content-Disposition: attachment; filename="invoice.exe"
+Content-Transfer-Encoding: base64
+
+aGFybWxlc3MgdGV4dCBldmlkZW5jZQ==
+--attachment-boundary--
