@@ -16,6 +16,7 @@ class Settings(BaseModel):
     app_version: str = "0.1.0"
     app_env: str = "development"
     app_log_level: str = "INFO"
+    demo_mode: bool = False
     database_url: str = "sqlite:///./email_threat_platform.db"
     max_upload_bytes: int = Field(default=26_214_400, gt=0)
 
@@ -42,11 +43,16 @@ class Settings(BaseModel):
             if origin.strip()
         )
 
+        demo_mode_value = os.getenv("DEMO_MODE", "false").strip().lower()
+        if demo_mode_value not in {"true", "false"}:
+            raise ValueError("DEMO_MODE must be either 'true' or 'false'.")
+
         return cls(
             app_name=os.getenv("APP_NAME", "email-threat-platform"),
             app_version=os.getenv("APP_VERSION", "0.1.0"),
             app_env=os.getenv("APP_ENV", "development"),
             app_log_level=os.getenv("APP_LOG_LEVEL", "INFO"),
+            demo_mode=demo_mode_value == "true",
             database_url=os.getenv(
                 "DATABASE_URL", "sqlite:///./email_threat_platform.db"
             ),
