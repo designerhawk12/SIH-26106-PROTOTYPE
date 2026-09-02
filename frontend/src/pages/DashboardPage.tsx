@@ -16,12 +16,13 @@ import { getCase, getDashboardStats, listCases } from "@/services/api";
 
 export function DashboardPage() {
   const stats = useQuery({ queryKey: ["dashboard-stats"], queryFn: getDashboardStats });
-  const cases = useQuery({ queryKey: ["cases"], queryFn: listCases });
+  const cases = useQuery({ queryKey: ["cases"], queryFn: listCases, retry: false });
   const featuredCaseId = cases.data?.[0]?.case_id;
   const featured = useQuery({
     queryKey: ["case", featuredCaseId],
     queryFn: () => getCase(featuredCaseId!),
     enabled: Boolean(featuredCaseId),
+    retry: false,
   });
 
   const s = stats.data;
@@ -105,7 +106,12 @@ export function DashboardPage() {
                 Highest priority open case
               </p>
               <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight">
-                {featured.data?.email.subject ?? "Loading case…"}
+                {featured.data?.email.subject ??
+                  (cases.isPending
+                    ? "Loading case…"
+                    : cases.isError
+                      ? "Case data unavailable"
+                      : "No cases have been analyzed yet")}
               </h2>
               <p className="mt-2 font-mono text-xs text-muted-foreground">
                 {featured.data?.email.sender}

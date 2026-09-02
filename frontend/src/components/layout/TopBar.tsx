@@ -1,9 +1,17 @@
+import { useQuery } from "@tanstack/react-query";
 import { Bell, Search, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getHealth } from "@/services/api";
 
 /** Top status strip: clock, system status, analyst identity. */
 export function TopBar() {
   const [now, setNow] = useState<Date | null>(null);
+  const health = useQuery({
+    queryKey: ["health"],
+    queryFn: getHealth,
+    refetchInterval: 30_000,
+    retry: 1,
+  });
 
   useEffect(() => {
     setNow(new Date());
@@ -24,12 +32,30 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="hidden items-center gap-2 font-mono text-[11px] text-muted-foreground sm:flex">
+        <div
+          className={`hidden items-center gap-2 font-mono text-[11px] sm:flex ${
+            health.isError ? "text-danger" : "text-muted-foreground"
+          }`}
+        >
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/70" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+            {!health.isError && (
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/70" />
+            )}
+            <span
+              className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
+                health.isError
+                  ? "bg-danger"
+                  : health.isPending
+                    ? "bg-muted-foreground"
+                    : "bg-success"
+              }`}
+            />
           </span>
-          ALL SYSTEMS OPERATIONAL
+          {health.isPending
+            ? "CHECKING API"
+            : health.isError
+              ? "API UNAVAILABLE"
+              : "API OPERATIONAL"}
         </div>
         <span className="hidden font-mono text-[11px] text-muted-foreground lg:block">
           {now ? now.toUTCString().replace("GMT", "UTC") : "—"}

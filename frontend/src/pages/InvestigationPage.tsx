@@ -24,17 +24,34 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ThreatBadge, reputationTone } from "@/components/ui/ThreatBadge";
 import { InfrastructureRouteVisual } from "@/components/visuals/InfrastructureRouteVisual";
 import { formatBytes, formatDateTime } from "@/lib/format";
-import { getCase } from "@/services/api";
+import { downloadCaseReport, getCase, getErrorMessage } from "@/services/api";
 import type { AnalysisViewModel } from "@/types/analysis";
 
 export function InvestigationPage({ caseId }: { caseId: string }) {
-  const { data } = useQuery({ queryKey: ["case", caseId], queryFn: () => getCase(caseId) });
+  const { data, error, isError, isPending, refetch } = useQuery({
+    queryKey: ["case", caseId],
+    queryFn: () => getCase(caseId),
+    retry: false,
+  });
   const [tab, setTab] = useState<InvestigationTab>("Overview");
+
+  if (isError) {
+    return (
+      <Panel className="mx-auto max-w-2xl p-8 text-center">
+        <p role="alert" className="text-sm text-danger">
+          {getErrorMessage(error, "This investigation could not be loaded.")}
+        </p>
+        <ActionButton variant="secondary" className="mt-5" onClick={() => void refetch()}>
+          Retry
+        </ActionButton>
+      </Panel>
+    );
+  }
 
   if (!data) {
     return (
       <div className="flex h-64 items-center justify-center font-mono text-xs text-muted-foreground">
-        Loading case {caseId}…
+        {isPending ? `Loading case ${caseId}…` : "Case data is unavailable."}
       </div>
     );
   }
@@ -81,6 +98,8 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
 }
 
 function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
+  const [reportState, setReportState] = useState<"idle" | "loading" | "error">("idle");
+  const [reportError, setReportError] = useState<string | null>(null);
   const meta = [
     { label: "Subject", value: analysis.email.subject },
     { label: "Sender", value: analysis.email.sender },
@@ -88,12 +107,39 @@ function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
     { label: "Timestamp", value: formatDateTime(analysis.email.date) },
   ];
 
+  const handleReport = async () => {
+    if (reportState === "loading") return;
+    setReportState("loading");
+    setReportError(null);
+    try {
+      await downloadCaseReport(analysis.case_id);
+      setReportState("idle");
+    } catch (error) {
+      setReportState("error");
+      setReportError(getErrorMessage(error, "The report is not available yet."));
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-start justify-between gap-6">
       <div className="min-w-0">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-          {analysis.case_id}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
+            {analysis.case_id}
+          </p>
+          <ThreatBadge
+            label={analysis.status}
+            tone={
+              analysis.status === "COMPLETED"
+                ? "success"
+                : analysis.status === "FAILED"
+                  ? "danger"
+                  : analysis.status === "PARTIAL"
+                    ? "warning"
+                    : "accent"
+            }
+          />
+        </div>
         <h1 className="mt-3 max-w-3xl text-3xl font-bold leading-tight tracking-tight lg:text-4xl">
           {analysis.email.subject}
         </h1>
@@ -108,13 +154,25 @@ function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
           ))}
         </dl>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <ActionButton icon={<FileText className="h-3.5 w-3.5" />} arrow>
-          Generate Report
-        </ActionButton>
-        <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>
-          Export Evidence
-        </ActionButton>
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ActionButton
+            icon={<FileText className="h-3.5 w-3.5" />}
+            arrow
+            disabled={reportState === "loading"}
+            onClick={() => void handleReport()}
+          >
+            {reportState === "loading" ? "Preparing Report" : "Generate Report"}
+          </ActionButton>
+          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>
+            Export Evidence
+          </ActionButton>
+        </div>
+        {reportError && (
+          <p role="alert" className="max-w-sm text-right text-xs text-danger">
+            {reportError}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -373,22 +431,39 @@ function InfrastructureTab({ analysis }: { analysis: AnalysisViewModel }) {
           {analysis.infrastructure.disclaimer}
         </p>
       </Panel>
-      <InfrastructureRouteVisual nodes={analysis.infrastructure.nodes} />
-      <div>
-        {analysis.infrastructure.nodes.map((node, i) => (
-          <InfrastructureHop
-            key={node.ip}
-            node={node}
-            index={i}
-            isLast={i === analysis.infrastructure.nodes.length - 1}
-          />
-        ))}
-      </div>
+      {analysis.infrastructure.nodes.length > 0 ? (
+        <>
+          <InfrastructureRouteVisual nodes={analysis.infrastructure.nodes} />
+          <div>
+            {analysis.infrastructure.nodes.map((node, i) => (
+              <InfrastructureHop
+                key={node.ip}
+                node={node}
+                index={i}
+                isLast={i === analysis.infrastructure.nodes.length - 1}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <Panel className="p-6 text-sm text-muted-foreground">
+          Observed infrastructure data is unavailable. Missing geolocation is not evidence of
+          safety.
+        </Panel>
+      )}
     </div>
   );
 }
 
 function FindingsTab({ analysis }: { analysis: AnalysisViewModel }) {
+  if (analysis.ai_findings.length === 0) {
+    return (
+      <Panel className="p-6 text-sm text-muted-foreground">
+        Detection findings are unavailable for this analysis. Missing findings are not treated as
+        safe.
+      </Panel>
+    );
+  }
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {analysis.ai_findings.map((finding, i) => (
