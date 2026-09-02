@@ -26,7 +26,7 @@ export function InfrastructureHop({ node, isLast, index }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Panel interactive spotlight className="p-5">
+      <Panel interactive spotlight tilt tone="network" className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="flex h-7 w-7 items-center justify-center rounded-sm border border-network/30 bg-network/10">

@@ -8,7 +8,7 @@ export function ExplainableRisk({ signals }: { signals: RiskSignal[] }) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <Panel className="p-6">
+    <Panel spotlight className="p-6">
       <SectionHeader
         eyebrow="Explainability"
         title="Why this email was flagged"
@@ -17,20 +17,21 @@ export function ExplainableRisk({ signals }: { signals: RiskSignal[] }) {
       <div className="mt-5 divide-y divide-border">
         {signals.map((signal, i) => (
           <div
-            key={signal.label}
+            key={signal.code}
             onMouseEnter={() => setOpen(i)}
             onMouseLeave={() => setOpen(null)}
-            className="group cursor-default py-3 transition-colors"
+            className="group relative cursor-default py-3 pl-3 transition-transform duration-200 hover:translate-x-1"
           >
+            <span className="absolute inset-y-2 left-0 w-px bg-border transition-colors group-hover:bg-accent" />
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent/70 transition-all duration-200 group-hover:shadow-[0_0_10px_2px_rgba(215,255,63,0.5)]" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent/70 transition-all duration-200 group-hover:bg-accent group-hover:shadow-[0_0_10px_2px_rgba(215,255,63,0.5)]" />
                 <span className="truncate text-sm text-foreground/90 transition-colors group-hover:text-foreground">
-                  {signal.label}
+                  {signal.description}
                 </span>
               </div>
               <span className="shrink-0 font-mono text-sm font-semibold text-accent">
-                +{signal.weight}
+                +{signal.points}
               </span>
             </div>
             <motion.div
@@ -41,10 +42,10 @@ export function ExplainableRisk({ signals }: { signals: RiskSignal[] }) {
             >
               <p className="pt-2 pl-4.5 text-xs leading-relaxed text-muted-foreground">
                 <span className="font-mono uppercase tracking-widest text-muted-foreground/70">
-                  {signal.category}
+                  {signal.code}
                 </span>
                 {" — "}
-                {signal.detail}
+                {signal.evidence_refs.join(", ") || "No additional evidence reference supplied"}
               </p>
             </motion.div>
           </div>

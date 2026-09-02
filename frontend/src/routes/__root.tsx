@@ -77,14 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Sentinel MX — Email Threat Forensics" },
+      {
+        name: "description",
+        content:
+          "AI-assisted email threat detection, infrastructure observation, and forensic intelligence workspace.",
+      },
+      { name: "author", content: "Sentinel MX" },
+      { property: "og:title", content: "Sentinel MX — Email Threat Forensics" },
+      {
+        property: "og:description",
+        content:
+          "Investigate hostile email evidence, observed routing infrastructure, and explainable risk signals.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {

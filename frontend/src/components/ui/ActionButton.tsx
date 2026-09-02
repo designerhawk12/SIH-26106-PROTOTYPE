@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
+import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
 import { cn } from "@/lib/utils";
 
 type Variant = "primary" | "secondary" | "ghost";
@@ -35,20 +36,28 @@ export function ActionButton({
   className,
   onClick,
 }: ActionButtonProps) {
+  const reduceMotion = useReducedMotionPreference();
+
   return (
     <motion.button
       type={type}
       disabled={disabled}
       onClick={onClick}
-      {...(disabled ? {} : { whileHover: { scale: 1.02 }, whileTap: { scale: 0.985 } })}
+      {...(disabled || reduceMotion
+        ? {}
+        : { whileHover: { scale: 1.02 }, whileTap: { scale: 0.985 } })}
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "group inline-flex items-center gap-2 rounded-sm px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em]",
+        "group relative inline-flex items-center gap-2 overflow-hidden rounded-sm px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em]",
         "transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40",
         variants[variant],
         className,
       )}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-[-45%] w-1/3 skew-x-[-18deg] bg-white/10 opacity-0 transition-all duration-500 group-hover:left-[120%] group-hover:opacity-100"
+      />
       {icon}
       <span>{children}</span>
       {arrow && (

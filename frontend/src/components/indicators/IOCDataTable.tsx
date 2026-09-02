@@ -26,7 +26,7 @@ export function IOCDataTable<T>({
   emptyLabel = "No indicators of this type were observed.",
 }: Props<T>) {
   return (
-    <Panel className="p-6">
+    <Panel spotlight className="p-6">
       <SectionHeader {...(eyebrow ? { eyebrow } : {})} title={title} />
       <div className="mt-5 overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-left">
@@ -56,7 +56,7 @@ export function IOCDataTable<T>({
             {rows.map((row, i) => (
               <tr
                 key={i}
-                className="border-b border-border/60 transition-colors duration-200 last:border-0 hover:bg-surface-hover/70"
+                className="group/ioc border-b border-border/60 transition-colors duration-200 last:border-0 hover:bg-surface-hover/70"
               >
                 {columns.map((column) => (
                   <td

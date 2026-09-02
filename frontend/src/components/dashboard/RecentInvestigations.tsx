@@ -8,7 +8,7 @@ import type { CaseSummary } from "@/types/analysis";
 
 export function RecentInvestigations({ cases }: { cases: CaseSummary[] }) {
   return (
-    <Panel className="h-full p-5">
+    <Panel spotlight className="h-full p-5">
       <SectionHeader
         eyebrow="Queue"
         title="Recent Investigations"
@@ -30,15 +30,19 @@ export function RecentInvestigations({ cases }: { cases: CaseSummary[] }) {
             className="group flex items-center gap-4 py-3 transition-colors hover:bg-surface-hover/60"
           >
             <span className="w-10 shrink-0 text-center font-mono text-sm font-bold text-foreground">
-              {item.risk_score}
+              {item.risk_score ?? "—"}
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-foreground group-hover:text-accent">
-                {item.subject}
+                {item.subject ?? "Subject unavailable"}
               </p>
-              <p className="truncate font-mono text-[11px] text-muted-foreground">{item.sender}</p>
+              <p className="truncate font-mono text-[11px] text-muted-foreground">
+                {item.original_filename ?? item.status}
+              </p>
             </div>
-            <ThreatBadge label={item.risk_level} tone={riskTone(item.risk_level)} />
+            {item.risk_severity && (
+              <ThreatBadge label={item.risk_severity} tone={riskTone(item.risk_severity)} />
+            )}
             <span className="hidden w-16 shrink-0 text-right font-mono text-[11px] text-muted-foreground md:block">
               {formatRelative(item.created_at)}
             </span>

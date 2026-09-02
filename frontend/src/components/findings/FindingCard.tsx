@@ -13,8 +13,11 @@ export function FindingCard({ finding, index = 0 }: { finding: AiFinding; index?
     >
       <Panel
         interactive
+        spotlight
+        tilt
+        tone="ai"
         className={cn(
-          "h-full p-5",
+          "group/finding h-full p-5",
           finding.detected && "border-ai/25 shadow-[0_0_28px_-18px_rgba(236,72,153,0.6)]",
         )}
       >
@@ -43,7 +46,10 @@ export function FindingCard({ finding, index = 0 }: { finding: AiFinding; index?
           </div>
           <div className="h-1 w-full overflow-hidden rounded-full bg-muted/60">
             <motion.div
-              className={cn("h-full rounded-full", finding.detected ? "bg-ai" : "bg-border-strong")}
+              className={cn(
+                "h-full rounded-full transition-[filter] duration-200 group-hover/finding:brightness-125",
+                finding.detected ? "bg-ai" : "bg-border-strong",
+              )}
               initial={{ width: 0 }}
               animate={{ width: `${finding.confidence * 100}%` }}
               transition={{ duration: 0.8, delay: 0.15 + index * 0.05 }}

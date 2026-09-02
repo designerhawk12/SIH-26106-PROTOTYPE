@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Fingerprint, Globe2, ScanLine, Sparkles } from "lucide-react";
+import { CursorGlow } from "@/components/effects/CursorGlow";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { CyberBlocks } from "@/components/ui/CyberBlocks";
 import { Panel } from "@/components/ui/Panel";
@@ -30,11 +31,12 @@ const capabilities = [
 
 export function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
+    <div className="relative isolate min-h-screen overflow-hidden bg-background">
       <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
       <div className="pointer-events-none absolute left-1/2 top-[-160px] h-[620px] w-[1100px] -translate-x-1/2 rounded-full bg-accent/[0.06] blur-[160px]" />
+      <CursorGlow />
 
-      <div className="relative mx-auto max-w-[1200px] px-6 py-10">
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-10">
         <header className="flex items-center justify-between">
           <p className="text-sm font-bold tracking-tight">SENTINEL MX</p>
           <Link to="/dashboard">
@@ -74,7 +76,7 @@ export function LandingPage() {
             </div>
           </motion.div>
 
-          <CyberBlocks className="mx-auto h-[360px] w-[360px]" />
+          <CyberBlocks className="mx-auto h-[min(360px,86vw)] w-[min(360px,86vw)]" />
         </section>
 
         <section className="grid gap-4 pb-24 sm:grid-cols-2 lg:grid-cols-4">
@@ -85,7 +87,7 @@ export function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.1 + i * 0.07 }}
             >
-              <Panel interactive spotlight className="h-full p-5">
+              <Panel interactive spotlight tilt className="h-full p-5">
                 <item.icon className="h-4 w-4 text-accent" />
                 <p className="mt-4 text-sm font-semibold">{item.title}</p>
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.body}</p>

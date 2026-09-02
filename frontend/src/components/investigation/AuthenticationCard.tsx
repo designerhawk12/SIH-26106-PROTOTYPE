@@ -22,13 +22,23 @@ export function AuthenticationCard({ name, check, index = 0 }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Panel interactive className="h-full p-6">
+      <Panel
+        interactive
+        spotlight
+        tilt
+        tone={check.result === "PASS" ? "success" : check.result === "FAIL" ? "danger" : "accent"}
+        className={cn(
+          "h-full p-6",
+          check.result === "PASS" && "border-success/25",
+          check.result === "FAIL" && "border-danger/30",
+        )}
+      >
         <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
           {name}
         </p>
         <p
           className={cn(
-            "mt-4 text-4xl font-bold tracking-tight",
+            "mt-4 inline-flex rounded-sm border border-current/20 bg-current/[0.04] px-2 py-1 text-3xl font-bold tracking-tight",
             resultColor[check.result],
           )}
         >

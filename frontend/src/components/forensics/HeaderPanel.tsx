@@ -16,7 +16,7 @@ export function HeaderPanel({ email }: { email: EmailHeaders }) {
   ];
 
   return (
-    <Panel className="p-6">
+    <Panel spotlight className="p-6">
       <SectionHeader eyebrow="Headers" title="Message Attributes" />
       <dl className="mt-5 divide-y divide-border">
         {rows.map((row) => (

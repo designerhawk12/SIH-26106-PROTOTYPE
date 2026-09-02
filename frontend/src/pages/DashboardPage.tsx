@@ -1,14 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import {
-  AlertOctagon,
-  Fish,
-  Landmark,
-  Mail,
-  Paperclip,
-  ShieldAlert,
-} from "lucide-react";
+import { AlertOctagon, Fish, Landmark, Mail, Paperclip, ShieldAlert } from "lucide-react";
 import { AuthFailuresCard } from "@/components/dashboard/AuthFailuresCard";
 import { RecentInvestigations } from "@/components/dashboard/RecentInvestigations";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -24,9 +17,11 @@ import { getCase, getDashboardStats, listCases } from "@/services/api";
 export function DashboardPage() {
   const stats = useQuery({ queryKey: ["dashboard-stats"], queryFn: getDashboardStats });
   const cases = useQuery({ queryKey: ["cases"], queryFn: listCases });
+  const featuredCaseId = cases.data?.[0]?.case_id;
   const featured = useQuery({
-    queryKey: ["case", "featured"],
-    queryFn: () => getCase("CASE-2026-0417"),
+    queryKey: ["case", featuredCaseId],
+    queryFn: () => getCase(featuredCaseId!),
+    enabled: Boolean(featuredCaseId),
   });
 
   const s = stats.data;
@@ -37,7 +32,7 @@ export function DashboardPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-wrap items-end justify-between gap-4"
+        className="grid items-end gap-4 lg:grid-cols-[1fr_360px]"
       >
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
@@ -49,13 +44,24 @@ export function DashboardPage() {
             Overview
           </h1>
         </div>
-        <Link to="/analyze">
+        <div className="relative hidden h-44 items-end justify-end lg:flex">
+          <Link to="/analyze" className="mb-2 mr-2">
+            <ActionButton arrow>Analyze Email</ActionButton>
+          </Link>
+        </div>
+        <Link to="/analyze" className="lg:hidden">
           <ActionButton arrow>Analyze Email</ActionButton>
         </Link>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-6">
-        <StatCard label="Emails Analyzed" value={s?.emails_analyzed ?? 0} icon={Mail} index={0} />
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          className="col-span-2"
+          label="Emails Analyzed"
+          value={s?.emails_analyzed ?? 0}
+          icon={Mail}
+          index={0}
+        />
         <StatCard
           label="Threats Detected"
           value={s?.threats_detected ?? 0}
@@ -77,6 +83,7 @@ export function DashboardPage() {
           icon={Landmark}
           tone="ai"
           index={4}
+          className="col-span-2"
         />
         <StatCard
           label="Suspicious Attachments"
@@ -88,9 +95,9 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <Panel sweep className="xl:col-span-2">
+        <Panel sweep spotlight tilt tone="danger" className="border-danger/15 xl:col-span-2">
           <div className="flex flex-col items-center gap-8 p-6 lg:flex-row lg:p-8">
-            {featured.data && (
+            {featured.data?.risk && (
               <RiskScore score={featured.data.risk.score} level={featured.data.risk.level} />
             )}
             <div className="min-w-0 flex-1">
@@ -104,7 +111,7 @@ export function DashboardPage() {
                 {featured.data?.email.sender}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {featured.data?.risk.classification.map((item, i) => (
+                {featured.data?.risk?.classification.map((item, i) => (
                   <ThreatBadge key={item} label={item} tone={i === 0 ? "danger" : "warning"} />
                 ))}
               </div>
