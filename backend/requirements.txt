@@ -6,7 +6,10 @@ pydantic==2.11.7
 pydantic-core==2.33.2
 sqlalchemy==2.0.43
 python-multipart==0.0.20
+reportlab==4.4.9
 
 # API test dependencies
 httpx==0.28.1
 pytest==8.4.1
+pytest-asyncio==1.1.0
+pypdf==6.10.0

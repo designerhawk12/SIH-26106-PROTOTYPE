@@ -1,0 +1,14 @@
+From: attacker@example.com
+To: target@example.com
+Subject: <script>alert('SIH-XSS')</script>
+Date: Wed, 02 Sep 2026 12:00:00 +0530
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+
+<html>
+<body>
+<script>alert('XSS')</script>
+<img src=x onerror="alert('XSS')">
+<p>Security test</p>
+</body>
+</html>

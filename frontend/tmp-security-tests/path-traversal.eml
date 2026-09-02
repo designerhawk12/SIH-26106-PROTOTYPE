@@ -1,0 +1,20 @@
+From: attacker@example.com
+To: target@example.com
+Subject: Attachment filename security test
+Date: Wed, 02 Sep 2026 12:00:00 +0530
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="boundary123"
+
+--boundary123
+Content-Type: text/plain
+
+Attachment filename traversal security test.
+
+--boundary123
+Content-Type: text/plain
+Content-Disposition: attachment; filename="../../evil.txt"
+Content-Transfer-Encoding: base64
+
+U2VudGluZWwgTVggc2VjdXJpdHkgdGVzdA==
+
+--boundary123--

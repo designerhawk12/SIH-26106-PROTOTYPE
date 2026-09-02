@@ -9,6 +9,7 @@ import pytest
 
 from backend.app.schemas import AuthenticationVerdict, IOCType
 from backend.app.services.email_forensics import EmailForensicsParser, parse_email
+from backend.app.services.email_forensics.parser import MAX_MIME_DEPTH, MAX_MIME_PARTS
 
 
 FIXTURE_DIRECTORY = Path(__file__).resolve().parents[3] / "fixtures" / "emails"
@@ -139,3 +140,47 @@ def test_prompt_injection_remains_untrusted_body_text(parser: EmailForensicsPars
     "This text is hostile email evidence and must be preserved only as data.",
 ]
     assert analysis.parse_warnings == ()
+
+
+def _nested_multipart(depth: int) -> bytes:
+    lines = ["MIME-Version: 1.0"]
+    for index in range(depth):
+        boundary = f"safe-boundary-{index}"
+        lines.extend(
+            [
+                f'Content-Type: multipart/mixed; boundary="{boundary}"',
+                "",
+                f"--{boundary}",
+            ]
+        )
+    lines.extend(["Content-Type: text/plain", "", "bounded evidence"])
+    for index in reversed(range(depth)):
+        lines.append(f"--safe-boundary-{index}--")
+    return "\r\n".join(lines).encode("ascii")
+
+
+def test_rejects_excessive_mime_nesting(parser: EmailForensicsParser) -> None:
+    with pytest.raises(ValueError, match="MIME nesting exceeds"):
+        parser.parse(_nested_multipart(MAX_MIME_DEPTH + 2))
+
+
+def test_rejects_excessive_mime_part_count(parser: EmailForensicsParser) -> None:
+    boundary = "many-safe-parts"
+    lines = [
+        "MIME-Version: 1.0",
+        f'Content-Type: multipart/mixed; boundary="{boundary}"',
+        "",
+    ]
+    for _ in range(MAX_MIME_PARTS):
+        lines.extend(
+            [
+                f"--{boundary}",
+                "Content-Type: text/plain",
+                "",
+                "evidence",
+            ]
+        )
+    lines.append(f"--{boundary}--")
+
+    with pytest.raises(ValueError, match="MIME structure exceeds"):
+        parser.parse("\r\n".join(lines).encode("ascii"))

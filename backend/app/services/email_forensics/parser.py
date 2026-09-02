@@ -46,6 +46,16 @@ _AUTH_VALUES = {
     "unknown": AuthenticationVerdict.UNKNOWN,
 }
 
+# These ceilings apply after the API's raw-byte upload limit. They prevent a
+# compact hostile message from producing an unbounded recursive MIME walk or
+# an excessively large normalized analysis document.
+MAX_MIME_DEPTH = 50
+MAX_MIME_PARTS = 1_000
+
+
+class EmailStructureLimitError(ValueError):
+    """Raised when hostile MIME structure exceeds safe deterministic limits."""
+
 
 class _HrefCollector(HTMLParser):
     """Extract anchor href values without rendering or evaluating HTML."""
@@ -293,7 +303,21 @@ class EmailForensicsParser:
         attachments: list[AttachmentEvidence] = []
         attachment_hashes: list[tuple[str, str]] = []
 
-        def visit(part: Message, part_id: str, parent_part_id: str | None) -> None:
+        def visit(
+            part: Message,
+            part_id: str,
+            parent_part_id: str | None,
+            *,
+            depth: int,
+        ) -> None:
+            if depth > MAX_MIME_DEPTH:
+                raise EmailStructureLimitError(
+                    f"MIME nesting exceeds the supported depth of {MAX_MIME_DEPTH}."
+                )
+            if len(mime_parts) >= MAX_MIME_PARTS:
+                raise EmailStructureLimitError(
+                    f"MIME structure exceeds the supported limit of {MAX_MIME_PARTS} parts."
+                )
             content_type = part.get_content_type().lower()
             disposition = part.get_content_disposition()
             filename = part.get_filename()
@@ -314,7 +338,12 @@ class EmailForensicsParser:
                 payload = part.get_payload()
                 if isinstance(payload, list):
                     for index, child in enumerate(payload, start=1):
-                        visit(child, f"{part_id}.{index}", part_id)
+                        visit(
+                            child,
+                            f"{part_id}.{index}",
+                            part_id,
+                            depth=depth + 1,
+                        )
                 return
 
             is_attachment = disposition == "attachment" or (
@@ -345,7 +374,7 @@ class EmailForensicsParser:
             elif content_type == "text/html":
                 html_bodies.append(_decode_text(part))
 
-        visit(message, "1", None)
+        visit(message, "1", None, depth=0)
 
         if not headers.get("message-id"):
             warnings.append("Message-ID header is missing.")

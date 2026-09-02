@@ -28,8 +28,10 @@ from ..dependencies import (
     get_analysis_orchestrator,
     get_case_repository,
     get_reporting_service,
+    get_export_service,
     get_runtime_settings,
 )
+from ...services.export.interfaces import EvidenceExportService
 
 router = APIRouter(prefix="/api/v1/cases", tags=["Cases"])
 
@@ -156,5 +158,41 @@ async def get_case_report(
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'attachment; filename="case-{analysis.case_id}.pdf"'
+        },
+    )
+
+
+@router.get("/{case_id}/evidence", response_class=Response)
+async def get_case_evidence(
+    case_id: UUID,
+    repository: Annotated[CaseRepository, Depends(get_case_repository)],
+    export_svc: Annotated[EvidenceExportService, Depends(get_export_service)],
+) -> Response:
+    analysis = await run_in_threadpool(repository.get_analysis, case_id)
+    if analysis is None:
+        raise AppError(
+            status_code=404,
+            code="CASE_NOT_FOUND",
+            message="The requested case was not found.",
+        )
+    if analysis.status in {AnalysisStatus.RECEIVED, AnalysisStatus.PROCESSING}:
+        raise AppError(
+            status_code=409,
+            code="EVIDENCE_NOT_READY",
+            message="The case is not ready for evidence export.",
+        )
+    try:
+        zip_bytes = await export_svc.export_case(analysis)
+    except Exception as exc:
+        raise AppError(
+            status_code=503,
+            code="EVIDENCE_EXPORT_FAILED",
+            message="The forensic evidence export is temporarily unavailable.",
+        ) from exc
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="sentinel-mx-case-{analysis.case_id}-evidence.zip"'
         },
     )

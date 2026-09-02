@@ -341,6 +341,30 @@ export async function downloadCaseReport(caseId: string): Promise<void> {
   URL.revokeObjectURL(objectUrl);
 }
 
+export async function getCaseEvidence(caseId: string): Promise<Blob> {
+  if (USE_MOCK) {
+    await delay(200);
+    return new Blob([], { type: "application/zip" });
+  }
+  const response = await request(`/api/v1/cases/${caseId}/evidence`, {
+    headers: { Accept: "application/zip" },
+  });
+  return response.blob();
+}
+
+export async function downloadCaseEvidence(caseId: string): Promise<void> {
+  const zip = await getCaseEvidence(caseId);
+  const objectUrl = URL.createObjectURL(zip);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = `sentinel-mx-case-${caseId}-evidence.zip`;
+  anchor.style.display = "none";
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
 export async function getHealth(): Promise<HealthResponse> {
   if (USE_MOCK) {
     await delay(120);

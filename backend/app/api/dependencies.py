@@ -31,7 +31,9 @@ def get_analysis_orchestrator(request: Request) -> AnalysisOrchestrator:
         AnalysisOrchestrator | None, request.app.state.analysis_orchestrator
     )
     if orchestrator is None:
-        orchestrator = build_default_analysis_orchestrator()
+        orchestrator = build_default_analysis_orchestrator(
+            get_runtime_settings(request)
+        )
         request.app.state.analysis_orchestrator = orchestrator
     return orchestrator
 
