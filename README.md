@@ -39,6 +39,10 @@ Email forensics -> AI detection -> Threat intelligence
 
 Uploads are size-limited and validated before parsing. Original names are metadata only, attachments are never executed, URLs are never automatically visited, and untrusted HTML is never directly rendered. External providers are optional failure domains: their timeouts or errors become warnings/unknown results and must not abort the core forensic analysis. Secrets are environment-only configuration and must be redacted from logs and reports.
 
+### Controlled demo mode
+
+`DEMO_MODE=false` is the default. Setting `DEMO_MODE=true` explicitly replaces only threat-intelligence and observed-infrastructure geolocation providers with deterministic synthetic adapters. Their provider identity contains `DEMO-SYNTHETIC (not live verified)`, and the analysis is marked `PARTIAL` with a demo warning. Email parsing, MIME processing, metadata, hashes, deterministic detection, deterministic risk, persistence, reports, and evidence export remain real. Demo mode never executes attachments, visits indicators, uploads attachment content, or performs attacker attribution.
+
 ### API surface
 
 The v1 contract defines synchronous analysis creation, case listing/retrieval, PDF report retrieval, and health status:
@@ -50,4 +54,3 @@ The v1 contract defines synchronous analysis creation, case listing/retrieval, P
 - `GET /api/v1/health`
 
 See `docs/contracts/openapi.yaml` for request/response details. Implementation, dependency selection, migrations, and local run commands are intentionally deferred.
-

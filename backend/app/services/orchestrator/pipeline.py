@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -40,19 +41,21 @@ class AnalysisPipelineOrchestrator:
         threat_intel: ThreatIntelService,
         geolocation: GeoLocationService,
         risk: RiskService,
+        mode_warnings: Sequence[str] = (),
     ) -> None:
         self._email_forensics = email_forensics
         self._threat_detection = threat_detection
         self._threat_intel = threat_intel
         self._geolocation = geolocation
         self._risk = risk
+        self._mode_warnings = tuple(mode_warnings)
 
     async def analyze(
         self, raw_email: bytes, *, original_filename: str | None = None
     ) -> EmailAnalysis:
         created_at = datetime.now(timezone.utc)
         case_id = uuid4()
-        warnings: list[str] = []
+        warnings: list[str] = list(self._mode_warnings)
 
         def warn(message: str) -> None:
             if message not in warnings:
