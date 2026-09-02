@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from ..core import AppError, Settings
 from ..db import CaseRepository, SqlAlchemyCaseRepository
+from ..services.orchestrator.factory import build_default_analysis_orchestrator
 from ..services.orchestrator.interfaces import AnalysisOrchestrator
 from ..services.reporting.interfaces import ReportingService
 
@@ -27,11 +28,8 @@ def get_analysis_orchestrator(request: Request) -> AnalysisOrchestrator:
         AnalysisOrchestrator | None, request.app.state.analysis_orchestrator
     )
     if orchestrator is None:
-        raise AppError(
-            status_code=503,
-            code="ANALYSIS_SERVICE_UNAVAILABLE",
-            message="Analysis services are not configured.",
-        )
+        orchestrator = build_default_analysis_orchestrator()
+        request.app.state.analysis_orchestrator = orchestrator
     return orchestrator
 
 
