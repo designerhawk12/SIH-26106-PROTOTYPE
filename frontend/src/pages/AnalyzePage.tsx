@@ -8,7 +8,9 @@ import { CyberBlocks } from "@/components/ui/CyberBlocks";
 import { Panel } from "@/components/ui/Panel";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
 import { formatBytes } from "@/lib/format";
-import { analyzeEmail } from "@/services/api";
+import { analyzeEmail, getErrorMessage } from "@/services/api";
+
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 const STAGES = [
   "Reading Email",
@@ -28,22 +30,61 @@ export function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [stage, setStage] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const reduceMotion = useReducedMotionPreference();
 
   const running = stage !== null;
 
+  const selectFile = (candidate: File | null) => {
+    setError(null);
+    if (!candidate) {
+      setFile(null);
+      return;
+    }
+    if (!candidate.name.trim()) {
+      setFile(null);
+      setError("The selected file must have a filename.");
+      return;
+    }
+    if (!candidate.name.toLowerCase().endsWith(".eml")) {
+      setFile(null);
+      setError("Only raw .eml email files are accepted.");
+      return;
+    }
+    if (candidate.size === 0) {
+      setFile(null);
+      setError("The selected .eml file is empty.");
+      return;
+    }
+    if (candidate.size > MAX_UPLOAD_BYTES) {
+      setFile(null);
+      setError("The selected .eml file exceeds the 25 MB upload limit.");
+      return;
+    }
+    setFile(candidate);
+  };
+
   /** Visual-only staged progress. Real analysis happens in the backend. */
   const runAnalysis = async () => {
     if (!file || running) return;
+    setError(null);
     setStage(0);
-    const analysis = analyzeEmail(file);
-    for (let i = 1; i < STAGES.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 35 : 520));
-      setStage(i);
+    const progressTimer = window.setInterval(
+      () =>
+        setStage((current) => (current === null ? null : Math.min(current + 1, STAGES.length - 2))),
+      reduceMotion ? 80 : 650,
+    );
+    try {
+      const result = await analyzeEmail(file);
+      window.clearInterval(progressTimer);
+      setStage(STAGES.length - 1);
+      await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 35 : 350));
+      await navigate({ to: "/cases/$caseId", params: { caseId: result.case_id } });
+    } catch (requestError) {
+      window.clearInterval(progressTimer);
+      setStage(null);
+      setError(getErrorMessage(requestError, "The email could not be analyzed."));
     }
-    const result = await analysis;
-    await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 35 : 500));
-    void navigate({ to: "/cases/$caseId", params: { caseId: result.case_id } });
   };
 
   return (
@@ -79,7 +120,7 @@ export function AnalyzePage() {
               e.preventDefault();
               setDragging(false);
               const dropped = e.dataTransfer.files?.[0];
-              if (dropped) setFile(dropped);
+              selectFile(dropped ?? null);
             }}
             className={`relative flex flex-col items-center justify-center overflow-hidden rounded-sm border border-dashed px-6 py-16 text-center transition-all duration-300 ${
               dragging
@@ -102,7 +143,7 @@ export function AnalyzePage() {
               type="file"
               accept=".eml,message/rfc822"
               className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => selectFile(e.target.files?.[0] ?? null)}
             />
             <div className="mt-6">
               <ActionButton variant="secondary" onClick={() => inputRef.current?.click()}>
@@ -134,7 +175,10 @@ export function AnalyzePage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setFile(null)}
+                  onClick={() => {
+                    selectFile(null);
+                    if (inputRef.current) inputRef.current.value = "";
+                  }}
                   aria-label="Remove file"
                   className="rounded-sm border border-border p-1 text-muted-foreground transition-colors hover:border-danger/60 hover:text-danger"
                 >
@@ -143,6 +187,15 @@ export function AnalyzePage() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {error && (
+            <p
+              role="alert"
+              className="relative mt-4 rounded-sm border border-danger/30 bg-danger/[0.06] px-4 py-3 text-xs text-danger"
+            >
+              {error}
+            </p>
+          )}
 
           <div className="relative mt-6 flex justify-end">
             <ActionButton arrow disabled={!file || running} onClick={runAnalysis}>

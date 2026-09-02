@@ -3,17 +3,22 @@ import { useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { Panel } from "@/components/ui/Panel";
 import { ThreatBadge, riskTone } from "@/components/ui/ThreatBadge";
 import { formatDateTime } from "@/lib/format";
-import { listCases } from "@/services/api";
+import { getErrorMessage, listCases } from "@/services/api";
 import type { RiskLevel } from "@/types/analysis";
 
 const SEVERITIES: (RiskLevel | "ALL")[] = ["ALL", "LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
 export function CasesPage() {
   const navigate = useNavigate();
-  const { data } = useQuery({ queryKey: ["cases"], queryFn: listCases });
+  const { data, error, isError, isPending, refetch } = useQuery({
+    queryKey: ["cases"],
+    queryFn: listCases,
+    retry: false,
+  });
   const [query, setQuery] = useState("");
   const [severity, setSeverity] = useState<RiskLevel | "ALL">("ALL");
 
@@ -72,6 +77,25 @@ export function CasesPage() {
             </tr>
           </thead>
           <tbody>
+            {isPending && (
+              <tr>
+                <td colSpan={5} className="px-5 py-10 text-center text-xs text-muted-foreground">
+                  Loading investigations…
+                </td>
+              </tr>
+            )}
+            {isError && (
+              <tr>
+                <td colSpan={5} className="px-5 py-10 text-center">
+                  <p role="alert" className="text-xs text-danger">
+                    {getErrorMessage(error, "Investigations could not be loaded.")}
+                  </p>
+                  <ActionButton variant="secondary" className="mt-4" onClick={() => void refetch()}>
+                    Retry
+                  </ActionButton>
+                </td>
+              </tr>
+            )}
             {rows.map((item, i) => (
               <motion.tr
                 key={item.case_id}
@@ -111,7 +135,7 @@ export function CasesPage() {
                 </td>
               </motion.tr>
             ))}
-            {rows.length === 0 && (
+            {!isPending && !isError && rows.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-5 py-10 text-center text-xs text-muted-foreground">
                   No investigations match the current filters.

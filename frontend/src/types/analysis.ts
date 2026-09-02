@@ -211,6 +211,20 @@ export interface CaseListResponse {
 export interface AnalyzeCaseResponse {
   analysis: EmailAnalysis;
 }
+export interface HealthResponse {
+  status: "ok";
+  service: "email-threat-platform";
+  version: string;
+  timestamp: string;
+}
+export interface ErrorResponse {
+  error: {
+    code: string;
+    message: string;
+    field: string | null;
+  };
+  request_id: string | null;
+}
 
 /* Presentation-only types below are derived centrally in services/api.ts. */
 export type AuthResult = "PASS" | "FAIL" | "UNKNOWN";

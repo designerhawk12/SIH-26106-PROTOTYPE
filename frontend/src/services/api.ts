@@ -9,24 +9,88 @@ import type {
   CaseSummary,
   DashboardStats,
   EmailAnalysis,
+  ErrorResponse,
   ExtractedIOC,
+  HealthResponse,
   MimeNode,
   Reputation,
   ReputationVerdict,
 } from "@/types/analysis";
 
-export const API_BASE_URL: string = import.meta.env["VITE_API_BASE_URL"] ?? "";
-export const USE_MOCK = import.meta.env["VITE_USE_MOCK_API"] !== "false";
+export const API_BASE_URL: string = (import.meta.env["VITE_API_BASE_URL"] ?? "").replace(
+  /\/+$/,
+  "",
+);
+export const USE_MOCK = import.meta.env["VITE_USE_MOCK_API"] === "true";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: { Accept: "application/json", ...(init?.headers ?? {}) },
-  });
-  if (!response.ok) throw new Error(`API request failed (${response.status}): ${path}`);
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code = "API_ERROR",
+    readonly field: string | null = null,
+    readonly requestId: string | null = null,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+async function errorFromResponse(response: Response): Promise<ApiError> {
+  try {
+    const payload = (await response.json()) as Partial<ErrorResponse>;
+    if (payload.error?.message) {
+      return new ApiError(
+        payload.error.message,
+        response.status,
+        payload.error.code,
+        payload.error.field ?? null,
+        payload.request_id ?? null,
+      );
+    }
+  } catch {
+    // Non-JSON failures are normalized below without exposing response contents.
+  }
+  return new ApiError(
+    `The server could not complete the request (${response.status}).`,
+    response.status,
+  );
+}
+
+async function request(path: string, init?: RequestInit, timeoutMs = 15_000): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      signal: init?.signal ?? controller.signal,
+      headers: { Accept: "application/json", ...(init?.headers ?? {}) },
+    });
+    if (!response.ok) throw await errorFromResponse(response);
+    return response;
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new ApiError("The analysis service did not respond in time.", 0, "NETWORK_TIMEOUT");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function requestJson<T>(path: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+  const response = await request(path, init, timeoutMs);
   return (await response.json()) as T;
+}
+
+export function getErrorMessage(error: unknown, fallback = "The request could not be completed.") {
+  if (error instanceof ApiError) {
+    return error.field ? `${error.message} (${error.field})` : error.message;
+  }
+  if (error instanceof TypeError) return "Unable to reach the analysis service.";
+  return error instanceof Error && error.message ? error.message : fallback;
 }
 
 function authResult(value: AuthenticationVerdict) {
@@ -226,10 +290,14 @@ export async function analyzeEmail(file: File): Promise<AnalysisViewModel> {
   }
   const body = new FormData();
   body.append("file", file);
-  const response = await requestJson<AnalyzeCaseResponse>("/api/v1/cases/analyze", {
-    method: "POST",
-    body,
-  });
+  const response = await requestJson<AnalyzeCaseResponse>(
+    "/api/v1/cases/analyze",
+    {
+      method: "POST",
+      body,
+    },
+    120_000,
+  );
   return toAnalysisView(response.analysis);
 }
 
@@ -254,11 +322,36 @@ export async function getCaseReport(caseId: string): Promise<Blob> {
     await delay(200);
     return new Blob([], { type: "application/pdf" });
   }
-  const response = await fetch(`${API_BASE_URL}/api/v1/cases/${caseId}/report`, {
+  const response = await request(`/api/v1/cases/${caseId}/report`, {
     headers: { Accept: "application/pdf" },
   });
-  if (!response.ok) throw new Error(`API request failed (${response.status}): report`);
   return response.blob();
+}
+
+export async function downloadCaseReport(caseId: string): Promise<void> {
+  const report = await getCaseReport(caseId);
+  const objectUrl = URL.createObjectURL(report);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = `case-${caseId}.pdf`;
+  anchor.style.display = "none";
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
+export async function getHealth(): Promise<HealthResponse> {
+  if (USE_MOCK) {
+    await delay(120);
+    return {
+      status: "ok",
+      service: "email-threat-platform",
+      version: "mock",
+      timestamp: new Date().toISOString(),
+    };
+  }
+  return requestJson<HealthResponse>("/api/v1/health", undefined, 5_000);
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
