@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, FileText, Info } from "lucide-react";
 import { useState } from "react";
+
 import { FindingCard } from "@/components/findings/FindingCard";
 import { HeaderPanel } from "@/components/forensics/HeaderPanel";
 import { MimeTree } from "@/components/forensics/MimeTree";
@@ -24,7 +25,12 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ThreatBadge, reputationTone } from "@/components/ui/ThreatBadge";
 import { InfrastructureRouteVisual } from "@/components/visuals/InfrastructureRouteVisual";
 import { formatBytes, formatDateTime } from "@/lib/format";
-import { downloadCaseReport, getCase, getErrorMessage } from "@/services/api";
+import {
+  downloadCaseEvidence,
+  downloadCaseReport,
+  getCase,
+  getErrorMessage,
+} from "@/services/api";
 import type { AnalysisViewModel } from "@/types/analysis";
 
 export function InvestigationPage({ caseId }: { caseId: string }) {
@@ -33,6 +39,7 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
     queryFn: () => getCase(caseId),
     retry: false,
   });
+
   const [tab, setTab] = useState<InvestigationTab>("Overview");
 
   if (isError) {
@@ -41,7 +48,12 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
         <p role="alert" className="text-sm text-danger">
           {getErrorMessage(error, "This investigation could not be loaded.")}
         </p>
-        <ActionButton variant="secondary" className="mt-5" onClick={() => void refetch()}>
+
+        <ActionButton
+          variant="secondary"
+          className="mt-5"
+          onClick={() => void refetch()}
+        >
           Retry
         </ActionButton>
       </Panel>
@@ -59,6 +71,7 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
       <CaseHeader analysis={data} />
+
       {data.risk ? (
         <>
           <RiskHero risk={data.risk} />
@@ -66,27 +79,35 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
         </>
       ) : (
         <Panel className="p-6 text-sm text-muted-foreground">
-          Risk scoring is not available for this partial analysis. Missing data is not treated as
-          safe.
+          Risk scoring is not available for this partial analysis. Missing data
+          is not treated as safe.
         </Panel>
       )}
 
       <div>
         <InvestigationTabs active={tab} onChange={setTab} />
+
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              duration: 0.25,
+              ease: [0.22, 1, 0.36, 1],
+            }}
             className="pt-6"
           >
             {tab === "Overview" && <OverviewTab analysis={data} />}
             {tab === "Email Forensics" && <ForensicsTab analysis={data} />}
-            {tab === "Authentication" && <AuthenticationTab analysis={data} />}
+            {tab === "Authentication" && (
+              <AuthenticationTab analysis={data} />
+            )}
             {tab === "Indicators" && <IndicatorsTab analysis={data} />}
-            {tab === "Infrastructure" && <InfrastructureTab analysis={data} />}
+            {tab === "Infrastructure" && (
+              <InfrastructureTab analysis={data} />
+            )}
             {tab === "AI Findings" && <FindingsTab analysis={data} />}
             {tab === "Timeline" && <TimelineTab analysis={data} />}
             {tab === "Evidence" && <EvidenceTab analysis={data} />}
@@ -98,25 +119,72 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
 }
 
 function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
-  const [reportState, setReportState] = useState<"idle" | "loading" | "error">("idle");
+  const [reportState, setReportState] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+
   const [reportError, setReportError] = useState<string | null>(null);
+
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
   const meta = [
-    { label: "Subject", value: analysis.email.subject },
-    { label: "Sender", value: analysis.email.sender },
-    { label: "Receiver", value: analysis.email.receiver },
-    { label: "Timestamp", value: formatDateTime(analysis.email.date) },
+    {
+      label: "Subject",
+      value: analysis.email.subject,
+    },
+    {
+      label: "Sender",
+      value: analysis.email.sender,
+    },
+    {
+      label: "Receiver",
+      value: analysis.email.receiver,
+    },
+    {
+      label: "Timestamp",
+      value: formatDateTime(analysis.email.date),
+    },
   ];
 
   const handleReport = async () => {
-    if (reportState === "loading") return;
+    if (reportState === "loading") {
+      return;
+    }
+
     setReportState("loading");
     setReportError(null);
+
     try {
       await downloadCaseReport(analysis.case_id);
       setReportState("idle");
     } catch (error) {
       setReportState("error");
-      setReportError(getErrorMessage(error, "The report is not available yet."));
+      setReportError(
+        getErrorMessage(error, "The report is not available yet."),
+      );
+    }
+  };
+
+  const handleExportEvidence = async () => {
+    if (isExporting) {
+      return;
+    }
+
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      await downloadCaseEvidence(analysis.case_id);
+    } catch (error) {
+      setExportError(
+        getErrorMessage(
+          error,
+          "The evidence export is currently unavailable.",
+        ),
+      );
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -127,6 +195,7 @@ function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
             {analysis.case_id}
           </p>
+
           <ThreatBadge
             label={analysis.status}
             tone={
@@ -140,20 +209,26 @@ function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
             }
           />
         </div>
+
         <h1 className="mt-3 max-w-3xl text-3xl font-bold leading-tight tracking-tight lg:text-4xl">
           {analysis.email.subject}
         </h1>
+
         <dl className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
           {meta.map((item) => (
             <div key={item.label} className="min-w-0">
               <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {item.label}
               </dt>
-              <dd className="truncate font-mono text-xs text-foreground/85">{item.value}</dd>
+
+              <dd className="truncate font-mono text-xs text-foreground/85">
+                {item.value}
+              </dd>
             </div>
           ))}
         </dl>
       </div>
+
       <div className="flex flex-col items-end gap-2">
         <div className="flex flex-wrap gap-2">
           <ActionButton
@@ -162,15 +237,36 @@ function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
             disabled={reportState === "loading"}
             onClick={() => void handleReport()}
           >
-            {reportState === "loading" ? "Preparing Report" : "Generate Report"}
+            {reportState === "loading"
+              ? "Preparing Report"
+              : "Generate Report"}
           </ActionButton>
-          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>
-            Export Evidence
+
+          <ActionButton
+            variant="secondary"
+            icon={<Download className="h-3.5 w-3.5" />}
+            disabled={isExporting}
+            onClick={() => void handleExportEvidence()}
+          >
+            {isExporting ? "Exporting Evidence" : "Export Evidence"}
           </ActionButton>
         </div>
+
         {reportError && (
-          <p role="alert" className="max-w-sm text-right text-xs text-danger">
+          <p
+            role="alert"
+            className="max-w-sm text-right text-xs text-danger"
+          >
             {reportError}
+          </p>
+        )}
+
+        {exportError && (
+          <p
+            role="alert"
+            className="max-w-sm text-right text-xs text-danger"
+          >
+            {exportError}
           </p>
         )}
       </div>
@@ -180,37 +276,55 @@ function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
 
 function OverviewTab({ analysis }: { analysis: AnalysisViewModel }) {
   const auth = analysis.authentication;
-  const detected = analysis.ai_findings.filter((f) => f.detected);
+  const detected = analysis.ai_findings.filter((finding) => finding.detected);
 
   return (
     <div className="grid gap-4 xl:grid-cols-3">
       <Panel spotlight tilt className="p-6 xl:col-span-2">
         <SectionHeader eyebrow="Assessment" title="Threat Summary" />
+
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-          {analysis.risk?.summary ?? "Risk scoring is unavailable for this partial analysis."}
+          {analysis.risk?.summary ??
+            "Risk scoring is unavailable for this partial analysis."}
         </p>
+
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Key Findings
             </p>
+
             <ul className="mt-2 space-y-1.5">
-              {detected.slice(0, 5).map((f) => (
-                <li key={f.type} className="text-xs text-foreground/85">
-                  · {f.title} — {Math.round(f.confidence * 100)}% confidence
+              {detected.slice(0, 5).map((finding) => (
+                <li
+                  key={finding.type}
+                  className="text-xs text-foreground/85"
+                >
+                  · {finding.title} —{" "}
+                  {Math.round(finding.confidence * 100)}% confidence
                 </li>
               ))}
             </ul>
           </div>
+
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Risk Breakdown
             </p>
+
             <ul className="mt-2 space-y-1.5">
-              {(analysis.risk?.signals ?? []).slice(0, 5).map((s) => (
-                <li key={s.code} className="flex justify-between text-xs text-foreground/85">
-                  <span className="truncate pr-3">{s.description}</span>
-                  <span className="font-mono text-accent">+{s.points}</span>
+              {(analysis.risk?.signals ?? []).slice(0, 5).map((signal) => (
+                <li
+                  key={signal.code}
+                  className="flex justify-between text-xs text-foreground/85"
+                >
+                  <span className="truncate pr-3">
+                    {signal.description}
+                  </span>
+
+                  <span className="font-mono text-accent">
+                    +{signal.points}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -220,25 +334,45 @@ function OverviewTab({ analysis }: { analysis: AnalysisViewModel }) {
 
       <Panel spotlight tilt className="p-6">
         <SectionHeader eyebrow="Message" title="Email Summary" />
+
         <dl className="mt-4 space-y-3">
           {[
-            { label: "From", value: `${analysis.email.sender_display_name}` },
-            { label: "Address", value: analysis.email.sender },
-            { label: "To", value: analysis.email.receiver },
-            { label: "Received", value: formatDateTime(analysis.email.date) },
+            {
+              label: "From",
+              value: `${analysis.email.sender_display_name}`,
+            },
+            {
+              label: "Address",
+              value: analysis.email.sender,
+            },
+            {
+              label: "To",
+              value: analysis.email.receiver,
+            },
+            {
+              label: "Received",
+              value: formatDateTime(analysis.email.date),
+            },
           ].map((row) => (
             <div key={row.label}>
               <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {row.label}
               </dt>
-              <dd className="truncate font-mono text-xs text-foreground/85">{row.value}</dd>
+
+              <dd className="truncate font-mono text-xs text-foreground/85">
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>
       </Panel>
 
       <Panel spotlight tone="danger" className="p-6">
-        <SectionHeader eyebrow="Sender validation" title="Authentication Summary" />
+        <SectionHeader
+          eyebrow="Sender validation"
+          title="Authentication Summary"
+        />
+
         <div className="mt-4 grid grid-cols-3 divide-x divide-border text-center">
           {(
             [
@@ -259,6 +393,7 @@ function OverviewTab({ analysis }: { analysis: AnalysisViewModel }) {
               >
                 {result}
               </p>
+
               <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {label}
               </p>
@@ -267,8 +402,16 @@ function OverviewTab({ analysis }: { analysis: AnalysisViewModel }) {
         </div>
       </Panel>
 
-      <Panel spotlight tone="network" className="p-6 xl:col-span-2">
-        <SectionHeader eyebrow="Network" title="Infrastructure Summary" />
+      <Panel
+        spotlight
+        tone="network"
+        className="p-6 xl:col-span-2"
+      >
+        <SectionHeader
+          eyebrow="Network"
+          title="Infrastructure Summary"
+        />
+
         <div className="mt-4 space-y-2">
           {analysis.infrastructure.nodes.map((node) => (
             <div
@@ -276,12 +419,20 @@ function OverviewTab({ analysis }: { analysis: AnalysisViewModel }) {
               className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 py-2 last:border-0"
             >
               <div className="min-w-0">
-                <p className="font-mono text-xs text-network">{node.ip}</p>
+                <p className="font-mono text-xs text-network">
+                  {node.ip}
+                </p>
+
                 <p className="text-[11px] text-muted-foreground">
-                  {node.role} · {node.city ?? "—"}, {node.country ?? "—"} · {node.isp ?? "—"}
+                  {node.role} · {node.city ?? "—"},{" "}
+                  {node.country ?? "—"} · {node.isp ?? "—"}
                 </p>
               </div>
-              <ThreatBadge label={node.reputation} tone={reputationTone(node.reputation)} />
+
+              <ThreatBadge
+                label={node.reputation}
+                tone={reputationTone(node.reputation)}
+              />
             </div>
           ))}
         </div>
@@ -294,6 +445,7 @@ function ForensicsTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <HeaderPanel email={analysis.email} />
+
       <div className="space-y-4">
         <MimeTree root={analysis.mime} />
         <ReceivedChain hops={analysis.received_chain} />
@@ -302,12 +454,30 @@ function ForensicsTab({ analysis }: { analysis: AnalysisViewModel }) {
   );
 }
 
-function AuthenticationTab({ analysis }: { analysis: AnalysisViewModel }) {
+function AuthenticationTab({
+  analysis,
+}: {
+  analysis: AnalysisViewModel;
+}) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <AuthenticationCard name="SPF" check={analysis.authentication.spf} index={0} />
-      <AuthenticationCard name="DKIM" check={analysis.authentication.dkim} index={1} />
-      <AuthenticationCard name="DMARC" check={analysis.authentication.dmarc} index={2} />
+      <AuthenticationCard
+        name="SPF"
+        check={analysis.authentication.spf}
+        index={0}
+      />
+
+      <AuthenticationCard
+        name="DKIM"
+        check={analysis.authentication.dkim}
+        index={1}
+      />
+
+      <AuthenticationCard
+        name="DMARC"
+        check={analysis.authentication.dmarc}
+        index={2}
+      />
     </div>
   );
 }
@@ -324,19 +494,32 @@ function IndicatorsTab({ analysis }: { analysis: AnalysisViewModel }) {
         columns={[
           {
             header: "IP Address",
-            render: (r) => <span className="font-mono text-xs">{r.ip}</span>,
+            render: (row) => (
+              <span className="font-mono text-xs">{row.ip}</span>
+            ),
           },
           {
             header: "Reputation",
-            render: (r) => <ThreatBadge label={r.reputation} tone={reputationTone(r.reputation)} />,
+            render: (row) => (
+              <ThreatBadge
+                label={row.reputation}
+                tone={reputationTone(row.reputation)}
+              />
+            ),
           },
           {
             header: "Source",
-            render: (r) => <span className="text-xs text-muted-foreground">{r.source}</span>,
+            render: (row) => (
+              <span className="text-xs text-muted-foreground">
+                {row.source}
+              </span>
+            ),
           },
           {
             header: "Actions",
-            render: (r) => <CopyValue value={r.ip} revealOnRowHover />,
+            render: (row) => (
+              <CopyValue value={row.ip} revealOnRowHover />
+            ),
           },
         ]}
       />
@@ -348,15 +531,28 @@ function IndicatorsTab({ analysis }: { analysis: AnalysisViewModel }) {
         columns={[
           {
             header: "Domain",
-            render: (r) => <span className="font-mono text-xs">{r.domain}</span>,
+            render: (row) => (
+              <span className="font-mono text-xs">
+                {row.domain}
+              </span>
+            ),
           },
           {
             header: "Reputation",
-            render: (r) => <ThreatBadge label={r.reputation} tone={reputationTone(r.reputation)} />,
+            render: (row) => (
+              <ThreatBadge
+                label={row.reputation}
+                tone={reputationTone(row.reputation)}
+              />
+            ),
           },
           {
             header: "Type",
-            render: (r) => <span className="text-xs text-muted-foreground">{r.type}</span>,
+            render: (row) => (
+              <span className="text-xs text-muted-foreground">
+                {row.type}
+              </span>
+            ),
           },
         ]}
       />
@@ -369,19 +565,31 @@ function IndicatorsTab({ analysis }: { analysis: AnalysisViewModel }) {
           {
             header: "URL",
             className: "max-w-[420px]",
-            render: (r) => (
-              <span className="block truncate font-mono text-xs" title={r.url}>
-                {r.url}
+            render: (row) => (
+              <span
+                className="block truncate font-mono text-xs"
+                title={row.url}
+              >
+                {row.url}
               </span>
             ),
           },
           {
             header: "Domain",
-            render: (r) => <span className="font-mono text-xs">{r.domain}</span>,
+            render: (row) => (
+              <span className="font-mono text-xs">
+                {row.domain}
+              </span>
+            ),
           },
           {
             header: "Reputation",
-            render: (r) => <ThreatBadge label={r.reputation} tone={reputationTone(r.reputation)} />,
+            render: (row) => (
+              <ThreatBadge
+                label={row.reputation}
+                tone={reputationTone(row.reputation)}
+              />
+            ),
           },
         ]}
       />
@@ -391,29 +599,47 @@ function IndicatorsTab({ analysis }: { analysis: AnalysisViewModel }) {
         title="Attachments"
         rows={attachments}
         columns={[
-          { header: "Filename", render: (r) => <span className="text-xs">{r.filename}</span> },
+          {
+            header: "Filename",
+            render: (row) => (
+              <span className="text-xs">{row.filename}</span>
+            ),
+          },
           {
             header: "MIME Type",
-            render: (r) => (
-              <span className="font-mono text-xs text-muted-foreground">{r.mime_type}</span>
+            render: (row) => (
+              <span className="font-mono text-xs text-muted-foreground">
+                {row.mime_type}
+              </span>
             ),
           },
           {
             header: "Size",
-            render: (r) => (
+            render: (row) => (
               <span className="font-mono text-xs text-muted-foreground">
-                {formatBytes(r.size_bytes)}
+                {formatBytes(row.size_bytes)}
               </span>
             ),
           },
           {
             header: "SHA-256",
             className: "max-w-[260px]",
-            render: (r) => <CopyValue value={r.sha256} truncate revealOnRowHover />,
+            render: (row) => (
+              <CopyValue
+                value={row.sha256}
+                truncate
+                revealOnRowHover
+              />
+            ),
           },
           {
             header: "Status",
-            render: (r) => <ThreatBadge label={r.status} tone={reputationTone(r.status)} />,
+            render: (row) => (
+              <ThreatBadge
+                label={row.status}
+                tone={reputationTone(row.status)}
+              />
+            ),
           },
         ]}
       />
@@ -421,34 +647,49 @@ function IndicatorsTab({ analysis }: { analysis: AnalysisViewModel }) {
   );
 }
 
-function InfrastructureTab({ analysis }: { analysis: AnalysisViewModel }) {
+function InfrastructureTab({
+  analysis,
+}: {
+  analysis: AnalysisViewModel;
+}) {
   return (
     <div className="space-y-4">
-      <SectionHeader eyebrow="Network" title="Observed Email Infrastructure" />
+      <SectionHeader
+        eyebrow="Network"
+        title="Observed Email Infrastructure"
+      />
+
       <Panel className="flex items-start gap-3 border-network/25 bg-network/[0.04] p-4">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-network" />
+
         <p className="text-xs leading-relaxed text-muted-foreground">
           {analysis.infrastructure.disclaimer}
         </p>
       </Panel>
+
       {analysis.infrastructure.nodes.length > 0 ? (
         <>
-          <InfrastructureRouteVisual nodes={analysis.infrastructure.nodes} />
+          <InfrastructureRouteVisual
+            nodes={analysis.infrastructure.nodes}
+          />
+
           <div>
-            {analysis.infrastructure.nodes.map((node, i) => (
+            {analysis.infrastructure.nodes.map((node, index) => (
               <InfrastructureHop
                 key={node.ip}
                 node={node}
-                index={i}
-                isLast={i === analysis.infrastructure.nodes.length - 1}
+                index={index}
+                isLast={
+                  index === analysis.infrastructure.nodes.length - 1
+                }
               />
             ))}
           </div>
         </>
       ) : (
         <Panel className="p-6 text-sm text-muted-foreground">
-          Observed infrastructure data is unavailable. Missing geolocation is not evidence of
-          safety.
+          Observed infrastructure data is unavailable. Missing geolocation
+          is not evidence of safety.
         </Panel>
       )}
     </div>
@@ -459,15 +700,20 @@ function FindingsTab({ analysis }: { analysis: AnalysisViewModel }) {
   if (analysis.ai_findings.length === 0) {
     return (
       <Panel className="p-6 text-sm text-muted-foreground">
-        Detection findings are unavailable for this analysis. Missing findings are not treated as
-        safe.
+        Detection findings are unavailable for this analysis. Missing
+        findings are not treated as safe.
       </Panel>
     );
   }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {analysis.ai_findings.map((finding, i) => (
-        <FindingCard key={finding.type} finding={finding} index={i} />
+      {analysis.ai_findings.map((finding, index) => (
+        <FindingCard
+          key={finding.type}
+          finding={finding}
+          index={index}
+        />
       ))}
     </div>
   );
@@ -476,14 +722,18 @@ function FindingsTab({ analysis }: { analysis: AnalysisViewModel }) {
 function TimelineTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
     <Panel spotlight className="max-w-2xl p-6">
-      <SectionHeader eyebrow="Chronology" title="Forensic Timeline" />
+      <SectionHeader
+        eyebrow="Chronology"
+        title="Forensic Timeline"
+      />
+
       <div className="mt-6">
-        {analysis.timeline.map((event, i) => (
+        {analysis.timeline.map((event, index) => (
           <TimelineEvent
             key={`${event.timestamp}-${event.label}`}
             event={event}
-            index={i}
-            isLast={i === analysis.timeline.length - 1}
+            index={index}
+            isLast={index === analysis.timeline.length - 1}
           />
         ))}
       </div>
@@ -502,6 +752,7 @@ function EvidenceTab({ analysis }: { analysis: AnalysisViewModel }) {
           value={evidence.email_sha256}
           caption="Integrity hash computed at intake."
         />
+
         {evidence.attachment_hashes.map((item) => (
           <EvidenceHash
             key={item.sha256}
@@ -509,19 +760,31 @@ function EvidenceTab({ analysis }: { analysis: AnalysisViewModel }) {
             value={item.sha256}
           />
         ))}
-        <EvidenceHash label="Case ID" value={evidence.case_id} />
-        <EvidenceHash label="Analysis Timestamp" value={formatDateTime(evidence.analyzed_at)} />
+
+        <EvidenceHash
+          label="Case ID"
+          value={evidence.case_id}
+        />
+
+        <EvidenceHash
+          label="Analysis Timestamp"
+          value={formatDateTime(evidence.analyzed_at)}
+        />
       </div>
 
       <Panel className="p-6">
-        <SectionHeader eyebrow="Chain of custody" title="Evidence Events" />
+        <SectionHeader
+          eyebrow="Chain of custody"
+          title="Evidence Events"
+        />
+
         <div className="mt-6">
-          {evidence.events.map((event, i) => (
+          {evidence.events.map((event, index) => (
             <TimelineEvent
               key={`${event.timestamp}-${event.label}`}
               event={event}
-              index={i}
-              isLast={i === evidence.events.length - 1}
+              index={index}
+              isLast={index === evidence.events.length - 1}
             />
           ))}
         </div>

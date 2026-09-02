@@ -10,7 +10,10 @@ from ..core import AppError, Settings
 from ..db import CaseRepository, SqlAlchemyCaseRepository
 from ..services.orchestrator.factory import build_default_analysis_orchestrator
 from ..services.orchestrator.interfaces import AnalysisOrchestrator
+from ..services.reporting.factory import build_reporting_service
 from ..services.reporting.interfaces import ReportingService
+from ..services.export.factory import build_export_service
+from ..services.export.interfaces import EvidenceExportService
 
 
 def get_runtime_settings(request: Request) -> Settings:
@@ -36,10 +39,15 @@ def get_analysis_orchestrator(request: Request) -> AnalysisOrchestrator:
 def get_reporting_service(request: Request) -> ReportingService:
     reporting = cast(ReportingService | None, request.app.state.reporting_service)
     if reporting is None:
-        raise AppError(
-            status_code=503,
-            code="REPORTING_SERVICE_UNAVAILABLE",
-            message="Reporting service is not configured.",
-        )
+        reporting = build_reporting_service()
+        request.app.state.reporting_service = reporting
     return reporting
+
+
+def get_export_service(request: Request) -> EvidenceExportService:
+    export_svc = cast(EvidenceExportService | None, getattr(request.app.state, "export_service", None))
+    if export_svc is None:
+        export_svc = build_export_service()
+        request.app.state.export_service = export_svc
+    return export_svc
 
