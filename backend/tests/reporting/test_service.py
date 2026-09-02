@@ -5,6 +5,7 @@ import pytest
 
 from backend.app.schemas import (
     AnalysisStatus,
+    AttachmentEvidence,
     DetectionCategory,
     DetectionFinding,
     DetectionResult,
@@ -46,7 +47,18 @@ def mock_analysis() -> EmailAnalysis:
                 spf=AuthenticationVerdict.FAIL,
                 dkim=AuthenticationVerdict.PASS,
                 dmarc=AuthenticationVerdict.NONE,
-            )
+            ),
+            attachments=(
+                AttachmentEvidence(
+                    attachment_id="attachment-1",
+                    filename="invoice.exe",
+                    content_type="application/octet-stream",
+                    content_disposition="attachment",
+                    size_bytes=22,
+                    sha256="abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+                    executed=False,
+                ),
+            ),
         ),
         risk=RiskResult(
             score=85,
@@ -131,7 +143,8 @@ async def test_successful_pdf_generation_content_and_safety(mock_analysis: Email
     assert "evil.com" in text
     
     # 9. Generated PDF contains attachment SHA-256 values.
-    assert "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" in text
+    assert "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890" in text
+    assert "22" in text
     
     # 12. Infrastructure wording uses "Observed Mail-Routing Infrastructure"
     assert "Observed Mail-Routing Infrastructure" in text
