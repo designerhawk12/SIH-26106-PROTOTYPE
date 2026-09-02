@@ -54,6 +54,10 @@ class AnalysisPipelineOrchestrator:
         case_id = uuid4()
         warnings: list[str] = []
 
+        def warn(message: str) -> None:
+            if message not in warnings:
+                warnings.append(message)
+
         try:
             parsed_email = self._email_forensics.parse(
                 raw_email, original_filename=original_filename
@@ -65,7 +69,9 @@ class AnalysisPipelineOrchestrator:
             detection = await self._threat_detection.detect(parsed_email)
         except Exception:  # noqa: BLE001 - optional service isolation boundary
             detection = DetectionResult(warnings=("Threat detection unavailable.",))
-            warnings.append("Threat detection failed; analysis is partial.")
+            warn("Threat detection failed; analysis is partial.")
+        if detection.warnings:
+            warn("Threat detection completed with warnings; analysis is partial.")
 
         try:
             threat_intel = await self._threat_intel.enrich(parsed_email.iocs)
@@ -76,7 +82,16 @@ class AnalysisPipelineOrchestrator:
                 unknown_indicators=parsed_email.iocs,
                 provider_errors=("Threat-intelligence provider unavailable.",),
             )
-            warnings.append("Threat intelligence failed; reputation is UNKNOWN.")
+            warn("Threat intelligence failed; reputation is UNKNOWN.")
+        if threat_intel.status in {
+            EnrichmentStatus.PARTIAL,
+            EnrichmentStatus.UNAVAILABLE,
+            EnrichmentStatus.UNKNOWN,
+        }:
+            warn(
+                "Threat intelligence is incomplete; unavailable reputation "
+                "remains UNKNOWN."
+            )
 
         try:
             geolocations = await self._geolocation.locate_public_ips(
@@ -90,7 +105,12 @@ class AnalysisPipelineOrchestrator:
                 )
                 for ip_address in parsed_email.originating_public_ips
             )
-            warnings.append("Infrastructure geolocation failed; analysis is partial.")
+            warn("Infrastructure geolocation failed; analysis is partial.")
+        if any(
+            result.status is GeoLocationStatus.PROVIDER_ERROR
+            for result in geolocations
+        ):
+            warn("Infrastructure geolocation is incomplete; analysis is partial.")
 
         try:
             risk = self._risk.score(
@@ -101,7 +121,7 @@ class AnalysisPipelineOrchestrator:
             )
         except Exception:  # noqa: BLE001 - optional service isolation boundary
             risk = None
-            warnings.append("Risk scoring failed; analysis is partial.")
+            warn("Risk scoring failed; analysis is partial.")
 
         completed_at = datetime.now(timezone.utc)
         status = AnalysisStatus.PARTIAL if warnings else AnalysisStatus.COMPLETED
@@ -115,6 +135,31 @@ class AnalysisPipelineOrchestrator:
             ),
             TimelineEvent(
                 sequence=1,
+                event_type=TimelineEventType.ENRICHMENT,
+                timestamp=completed_at,
+                title="Email forensics and detection completed",
+                source="orchestrator",
+            ),
+            TimelineEvent(
+                sequence=2,
+                event_type=TimelineEventType.ENRICHMENT,
+                timestamp=completed_at,
+                title="Threat intelligence and infrastructure enrichment completed",
+                source="orchestrator",
+            ),
+            TimelineEvent(
+                sequence=3,
+                event_type=TimelineEventType.FINDING,
+                timestamp=completed_at,
+                title=(
+                    "Deterministic risk scoring completed"
+                    if risk is not None
+                    else "Deterministic risk scoring unavailable"
+                ),
+                source="orchestrator",
+            ),
+            TimelineEvent(
+                sequence=4,
                 event_type=TimelineEventType.ANALYSIS_COMPLETED,
                 timestamp=completed_at,
                 title=(
