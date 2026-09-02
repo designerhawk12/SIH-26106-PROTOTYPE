@@ -18,7 +18,13 @@ class Settings(BaseModel):
     app_log_level: str = "INFO"
     database_url: str = "sqlite:///./email_threat_platform.db"
     max_upload_bytes: int = Field(default=26_214_400, gt=0)
-    allowed_origins: tuple[str, ...] = ("http://localhost:5173",)
+
+    allowed_origins: tuple[str, ...] = (
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    )
 
     @classmethod
     def from_environment(cls) -> Settings:
@@ -26,9 +32,16 @@ class Settings(BaseModel):
 
         origins = tuple(
             origin.strip()
-            for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+            for origin in os.getenv(
+                "ALLOWED_ORIGINS",
+                "http://localhost:8080,"
+                "http://127.0.0.1:8080,"
+                "http://localhost:5173,"
+                "http://127.0.0.1:5173",
+            ).split(",")
             if origin.strip()
         )
+
         return cls(
             app_name=os.getenv("APP_NAME", "email-threat-platform"),
             app_version=os.getenv("APP_VERSION", "0.1.0"),
@@ -46,4 +59,3 @@ def get_settings() -> Settings:
     """Return a fresh environment snapshot for application construction."""
 
     return Settings.from_environment()
-
