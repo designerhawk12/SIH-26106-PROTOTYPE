@@ -3,11 +3,15 @@ import { Panel } from "@/components/ui/Panel";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { DashboardStats } from "@/types/analysis";
 
-export function ThreatClassificationChart({ data }: { data: DashboardStats["classification_breakdown"] }) {
+export function ThreatClassificationChart({
+  data,
+}: {
+  data: DashboardStats["classification_breakdown"];
+}) {
   const max = Math.max(...data.map((d) => d.count), 1);
 
   return (
-    <Panel interactive className="h-full p-5">
+    <Panel interactive spotlight tilt tone="ai" className="h-full p-5">
       <SectionHeader eyebrow="Distribution" title="Threat Classification" />
       <div className="mt-6 space-y-4">
         {data.map((item, i) => (

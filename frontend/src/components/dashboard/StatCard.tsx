@@ -34,11 +34,18 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <motion.div
+      className={className}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Panel interactive spotlight className={cn("h-full p-5", className)}>
+      <Panel
+        interactive
+        spotlight
+        tilt
+        tone={tone === "network" || tone === "ai" || tone === "danger" ? tone : "accent"}
+        className="h-full p-5"
+      >
         <div className="flex items-start justify-between">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             {label}
@@ -50,6 +57,12 @@ export function StatCard({
           className="mt-6 block text-3xl font-bold tracking-tight text-foreground"
         />
         {delta && <p className="mt-1 font-mono text-[11px] text-muted-foreground">{delta}</p>}
+        <span
+          className={cn(
+            "absolute inset-x-5 bottom-0 h-px opacity-50",
+            toneText[tone].replace("text-", "bg-"),
+          )}
+        />
       </Panel>
     </motion.div>
   );

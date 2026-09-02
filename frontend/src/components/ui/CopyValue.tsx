@@ -7,9 +7,15 @@ interface CopyValueProps {
   /** Visually truncate long hashes while still copying the full value. */
   truncate?: boolean;
   className?: string;
+  revealOnRowHover?: boolean;
 }
 
-export function CopyValue({ value, truncate = false, className }: CopyValueProps) {
+export function CopyValue({
+  value,
+  truncate = false,
+  className,
+  revealOnRowHover = false,
+}: CopyValueProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -25,10 +31,7 @@ export function CopyValue({ value, truncate = false, className }: CopyValueProps
   return (
     <span className={cn("group inline-flex max-w-full items-center gap-2", className)}>
       <span
-        className={cn(
-          "font-mono text-xs text-foreground/85",
-          truncate && "block truncate",
-        )}
+        className={cn("font-mono text-xs text-foreground/85", truncate && "block truncate")}
         title={value}
       >
         {value}
@@ -37,7 +40,10 @@ export function CopyValue({ value, truncate = false, className }: CopyValueProps
         type="button"
         onClick={copy}
         aria-label="Copy to clipboard"
-        className="shrink-0 rounded-sm border border-border p-1 text-muted-foreground transition-colors duration-200 hover:border-accent/60 hover:text-accent"
+        className={cn(
+          "shrink-0 rounded-sm border border-border p-1 text-muted-foreground transition-all duration-200 hover:border-accent/60 hover:text-accent focus-visible:opacity-100",
+          revealOnRowHover && "opacity-0 group-hover/ioc:opacity-100",
+        )}
       >
         {copied ? <Check className="h-3 w-3 text-accent" /> : <Copy className="h-3 w-3" />}
       </button>

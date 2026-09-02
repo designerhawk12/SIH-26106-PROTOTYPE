@@ -7,7 +7,7 @@ import type { RiskAssessment } from "@/types/analysis";
 
 export function RiskHero({ risk }: { risk: RiskAssessment }) {
   return (
-    <Panel sweep className="p-6 lg:p-8">
+    <Panel sweep spotlight tilt tone="danger" className="border-danger/20 p-6 lg:p-8">
       <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:gap-12">
         <RiskScore score={risk.score} level={risk.level} />
 
@@ -37,6 +37,26 @@ export function RiskHero({ risk }: { risk: RiskAssessment }) {
             <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-danger">
               {risk.indicator_count} Threat Indicators Detected
             </span>
+          </div>
+          <div className="mt-6 grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-sm border border-border bg-border">
+            <div className="bg-surface-raised px-3 py-2">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                Score
+              </p>
+              <p className="mt-1 font-mono text-xs text-foreground">{risk.score}/100</p>
+            </div>
+            <div className="bg-surface-raised px-3 py-2">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                Severity
+              </p>
+              <p className="mt-1 font-mono text-xs text-danger">{risk.level}</p>
+            </div>
+            <div className="bg-surface-raised px-3 py-2">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                Signals
+              </p>
+              <p className="mt-1 font-mono text-xs text-foreground">{risk.indicator_count}</p>
+            </div>
           </div>
         </div>
       </div>

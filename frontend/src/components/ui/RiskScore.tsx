@@ -1,12 +1,13 @@
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
 import { cn } from "@/lib/utils";
 import type { RiskLevel } from "@/types/analysis";
 
 const levelColor: Record<RiskLevel, string> = {
   LOW: "var(--success)",
   MEDIUM: "var(--warning)",
-  HIGH: "var(--warning)",
+  HIGH: "var(--danger)",
   CRITICAL: "var(--danger)",
 };
 
@@ -17,19 +18,37 @@ const levelText: Record<RiskLevel, string> = {
   CRITICAL: "text-danger",
 };
 
-/** Animated count-up used for scores and statistics. */
+/** Viewport-deferred count-up used for scores and operational statistics. */
 export function CountUp({ value, className }: { value: number; className?: string }) {
-  const motionValue = useMotionValue(0);
-  const spring = useSpring(motionValue, { duration: 1200, bounce: 0 });
-  const rounded = useTransform(spring, (latest) => Math.round(latest).toLocaleString("en-US"));
-  const [display, setDisplay] = useState("0");
+  const ref = useRef<HTMLSpanElement>(null);
+  const visible = useInView(ref, { once: true, amount: 0.6 });
+  const reduceMotion = useReducedMotionPreference();
+  const [display, setDisplay] = useState(reduceMotion ? value : 0);
 
   useEffect(() => {
-    motionValue.set(value);
-    return rounded.on("change", (latest) => setDisplay(latest));
-  }, [motionValue, rounded, value]);
+    if (!visible) return;
+    if (reduceMotion) {
+      setDisplay(value);
+      return;
+    }
 
-  return <span className={className}>{display}</span>;
+    const startedAt = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const progress = Math.min((now - startedAt) / 760, 1);
+      const eased = 1 - (1 - progress) ** 4;
+      setDisplay(Math.round(value * eased));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [reduceMotion, value, visible]);
+
+  return (
+    <span ref={ref} className={className}>
+      {display.toLocaleString("en-US")}
+    </span>
+  );
 }
 
 interface RiskScoreProps {
@@ -39,22 +58,47 @@ interface RiskScoreProps {
   className?: string;
 }
 
-/** Animated circular risk indicator. */
+/** Technical SVG risk gauge with ticks, controlled glow, and reduced-motion behavior. */
 export function RiskScore({ score, level, size = 190, className }: RiskScoreProps) {
-  const stroke = 8;
-  const radius = (size - stroke) / 2;
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useInView(ref, { once: true, amount: 0.45 });
+  const reduceMotion = useReducedMotionPreference();
+  const stroke = 7;
+  const radius = (size - 22) / 2;
   const circumference = 2 * Math.PI * radius;
   const color = levelColor[level];
+  const normalizedScore = Math.max(0, Math.min(score, 100));
+  const markerAngle = (normalizedScore / 100) * Math.PI * 2 - Math.PI / 2;
+  const markerX = size / 2 + Math.cos(markerAngle) * radius;
+  const markerY = size / 2 + Math.sin(markerAngle) * radius;
 
   return (
-    <div className={cn("relative", className)} style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div ref={ref} className={cn("relative", className)} style={{ width: size, height: size }}>
+      <div className="pointer-events-none absolute inset-[18%] rounded-full bg-danger/[0.055] blur-2xl" />
+      <svg width={size} height={size} className="relative overflow-visible" aria-hidden>
+        {Array.from({ length: 24 }, (_, index) => {
+          const angle = (index / 24) * Math.PI * 2 - Math.PI / 2;
+          const outer = radius + 8;
+          const inner = radius + (index % 3 === 0 ? 2 : 4);
+          return (
+            <line
+              key={index}
+              x1={size / 2 + Math.cos(angle) * inner}
+              y1={size / 2 + Math.sin(angle) * inner}
+              x2={size / 2 + Math.cos(angle) * outer}
+              y2={size / 2 + Math.sin(angle) * outer}
+              stroke="var(--border-strong)"
+              strokeWidth={index % 3 === 0 ? 1.5 : 1}
+              opacity={index % 3 === 0 ? 0.9 : 0.55}
+            />
+          );
+        })}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="oklch(1 0 0 / 8%)"
+          stroke="oklch(1 0 0 / 7%)"
           strokeWidth={stroke}
         />
         <motion.circle
@@ -66,11 +110,27 @@ export function RiskScore({ score, level, size = 190, className }: RiskScoreProp
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
           initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: circumference * (1 - score / 100) }}
-          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-          style={{ filter: `drop-shadow(0 0 10px ${color})` }}
+          animate={{
+            strokeDashoffset:
+              visible || reduceMotion ? circumference * (1 - normalizedScore / 100) : circumference,
+          }}
+          transition={{ duration: reduceMotion ? 0 : 1.05, ease: [0.16, 1, 0.3, 1] }}
+          style={{ filter: `drop-shadow(0 0 7px ${color})` }}
         />
+        {(visible || reduceMotion) && (
+          <motion.circle
+            cx={markerX}
+            cy={markerY}
+            r="3"
+            fill={color}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: reduceMotion ? 0 : 0.7, duration: 0.25 }}
+            style={{ filter: `drop-shadow(0 0 6px ${color})` }}
+          />
+        )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="flex items-baseline">

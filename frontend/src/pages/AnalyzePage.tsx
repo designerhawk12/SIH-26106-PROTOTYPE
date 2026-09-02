@@ -2,9 +2,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { ScanLine } from "@/components/effects/ScanLine";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { CyberBlocks } from "@/components/ui/CyberBlocks";
 import { Panel } from "@/components/ui/Panel";
+import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
 import { formatBytes } from "@/lib/format";
 import { analyzeEmail } from "@/services/api";
 
@@ -26,6 +28,7 @@ export function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [stage, setStage] = useState<number | null>(null);
+  const reduceMotion = useReducedMotionPreference();
 
   const running = stage !== null;
 
@@ -35,11 +38,11 @@ export function AnalyzePage() {
     setStage(0);
     const analysis = analyzeEmail(file);
     for (let i = 1; i < STAGES.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 520));
+      await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 35 : 520));
       setStage(i);
     }
     const result = await analysis;
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, reduceMotion ? 35 : 500));
     void navigate({ to: "/cases/$caseId", params: { caseId: result.case_id } });
   };
 
@@ -64,7 +67,7 @@ export function AnalyzePage() {
       </motion.div>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <Panel className="relative p-6">
+        <Panel spotlight tilt sweep className="relative p-6">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
           <div
             onDragOver={(e) => {
@@ -78,13 +81,20 @@ export function AnalyzePage() {
               const dropped = e.dataTransfer.files?.[0];
               if (dropped) setFile(dropped);
             }}
-            className={`relative flex flex-col items-center justify-center rounded-sm border border-dashed px-6 py-16 text-center transition-colors duration-300 ${
-              dragging ? "border-accent bg-accent/[0.04]" : "border-border-strong"
+            className={`relative flex flex-col items-center justify-center overflow-hidden rounded-sm border border-dashed px-6 py-16 text-center transition-all duration-300 ${
+              dragging
+                ? "scale-[1.01] border-accent bg-accent/[0.055] shadow-[inset_0_0_42px_-28px_var(--accent)]"
+                : "border-border-strong"
             }`}
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-sm border border-border bg-surface">
+            {dragging && <ScanLine />}
+            <motion.span
+              {...(dragging && !reduceMotion ? { animate: { y: [0, -5, 0] } } : {})}
+              transition={{ duration: 1.2, repeat: Infinity }}
+              className="flex h-12 w-12 items-center justify-center rounded-sm border border-border bg-surface"
+            >
               <UploadCloud className="h-5 w-5 text-accent" />
-            </span>
+            </motion.span>
             <p className="mt-5 text-sm font-semibold">Drag and drop an .EML file</p>
             <p className="mt-1 text-xs text-muted-foreground">Maximum file size 25 MB</p>
             <input
@@ -107,8 +117,14 @@ export function AnalyzePage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="relative mt-4 flex items-center gap-3 rounded-sm border border-border bg-surface-raised px-4 py-3"
+                className="relative mt-4 flex items-center gap-3 overflow-hidden rounded-sm border border-success/25 bg-success/[0.035] px-4 py-3"
               >
+                <motion.span
+                  aria-hidden
+                  className="absolute inset-y-0 left-0 w-px bg-success"
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                />
                 <FileText className="h-4 w-4 shrink-0 text-accent" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm text-foreground">{file.name}</p>
@@ -135,26 +151,21 @@ export function AnalyzePage() {
           </div>
         </Panel>
 
-        <Panel className="relative overflow-hidden p-6">
+        <Panel spotlight tone="ai" className="relative overflow-hidden p-6">
           <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             Analysis Pipeline
           </p>
 
           {!running ? (
             <div className="mt-4 flex flex-col items-center">
-              <CyberBlocks className="h-56 w-56" />
+              <CyberBlocks className="w-full max-w-[280px]" />
               <p className="mt-2 text-center text-xs leading-relaxed text-muted-foreground">
                 Awaiting evidence. Submit an email to start a forensic case.
               </p>
             </div>
           ) : (
             <div className="relative mt-5">
-              <motion.div
-                className="scan-line absolute inset-x-0 h-px"
-                initial={{ top: 0 }}
-                animate={{ top: ["0%", "100%", "0%"] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-              />
+              <ScanLine />
               <ol className="space-y-3">
                 {STAGES.map((label, i) => {
                   const done = stage !== null && i < stage;

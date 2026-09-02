@@ -12,11 +12,13 @@ export function ReportsPage() {
   return (
     <div className="mx-auto max-w-[1200px] space-y-6">
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">Documentation</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
+          Documentation
+        </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight lg:text-5xl">Forensic Reports</h1>
       </div>
 
-      <Panel sweep className="p-8">
+      <Panel sweep spotlight tilt className="p-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="max-w-2xl">
             <h2 className="text-2xl font-bold tracking-tight">Generate Forensic Report</h2>
@@ -36,11 +38,13 @@ export function ReportsPage() {
         <SectionHeader eyebrow="Archive" title="Available Case Reports" className="mb-4" />
         <div className="grid gap-4 md:grid-cols-2">
           {(data ?? []).map((item) => (
-            <Panel key={item.case_id} interactive spotlight className="p-5">
+            <Panel key={item.case_id} interactive spotlight tilt className="p-5">
               <div className="flex items-start gap-3">
                 <FileText className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-foreground">{item.subject}</p>
+                  <p className="truncate text-sm text-foreground">
+                    {item.subject ?? "Subject unavailable"}
+                  </p>
                   <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                     {item.case_id} · {formatDateTime(item.created_at)}
                   </p>

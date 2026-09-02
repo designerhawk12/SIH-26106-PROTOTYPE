@@ -160,12 +160,7 @@
 }
 
 @utility scan-line {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    oklch(0.92 0.21 118 / 70%),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, oklch(0.92 0.21 118 / 70%), transparent);
 }
 
 @keyframes sweep-x {
@@ -179,4 +174,140 @@
 
 @utility animate-sweep {
   animation: sweep-x 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--surface-raised),
+    var(--surface-hover),
+    var(--surface-raised)
+  );
+  background-size: 220% 100%;
+  animation: skeleton-sweep 1.7s ease-in-out infinite;
+}
+
+/* --- Signature 3D evidence topology ------------------------------------ */
+
+.landing-cursor-glow {
+  width: 600px;
+  height: 600px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    oklch(0.92 0.21 118 / 8%) 0%,
+    oklch(0.92 0.21 118 / 3.5%) 34%,
+    transparent 72%
+  );
+  will-change: transform, opacity;
+}
+
+.cyber-cube-stage {
+  min-height: 0;
+  aspect-ratio: 1;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  container-type: inline-size;
+  contain: layout paint style;
+}
+
+.cyber-cube-compact {
+  min-height: 0;
+}
+
+.cyber-cube-cluster,
+.cyber-cube-anchor,
+.cyber-cube {
+  transform-style: preserve-3d;
+}
+
+.cyber-cube-anchor {
+  position: absolute;
+}
+
+.cyber-cube {
+  position: relative;
+  width: var(--cube-size);
+  height: var(--cube-size);
+  color: var(--cube-color);
+  will-change: transform;
+  transform-origin: 50% 50% 0;
+}
+
+.cyber-cube-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklch, var(--cube-color) 62%, transparent);
+  background: color-mix(in oklch, var(--surface-raised) 88%, var(--cube-color) 12%);
+  box-shadow: inset 0 0 24px color-mix(in oklch, var(--cube-color) 8%, transparent);
+  backface-visibility: hidden;
+}
+
+.cyber-cube-front {
+  transform: translateZ(var(--cube-half));
+  background: color-mix(in oklch, var(--surface-raised) 82%, var(--cube-color) 18%);
+  box-shadow:
+    inset 0 0 28px color-mix(in oklch, var(--cube-color) 12%, transparent),
+    0 0 24px -10px var(--cube-color);
+}
+
+.cyber-cube-back {
+  transform: rotateY(180deg) translateZ(var(--cube-half));
+}
+
+.cyber-cube-right {
+  transform: rotateY(90deg) translateZ(var(--cube-half));
+  filter: brightness(0.72);
+}
+
+.cyber-cube-left {
+  transform: rotateY(-90deg) translateZ(var(--cube-half));
+  filter: brightness(0.62);
+}
+
+.cyber-cube-top {
+  transform: rotateX(90deg) translateZ(var(--cube-half));
+  filter: brightness(1.12);
+}
+
+.cyber-cube-bottom {
+  transform: rotateX(-90deg) translateZ(var(--cube-half));
+  filter: brightness(0.54);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .cyber-cube {
+    will-change: auto;
+  }
+
+  .landing-cursor-glow {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .landing-cursor-glow {
+    display: none;
+  }
 }

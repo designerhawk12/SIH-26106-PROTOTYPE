@@ -22,9 +22,10 @@ import { EvidenceHash } from "@/components/ui/EvidenceHash";
 import { Panel } from "@/components/ui/Panel";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ThreatBadge, reputationTone } from "@/components/ui/ThreatBadge";
+import { InfrastructureRouteVisual } from "@/components/visuals/InfrastructureRouteVisual";
 import { formatBytes, formatDateTime } from "@/lib/format";
 import { getCase } from "@/services/api";
-import type { EmailAnalysis } from "@/types/analysis";
+import type { AnalysisViewModel } from "@/types/analysis";
 
 export function InvestigationPage({ caseId }: { caseId: string }) {
   const { data } = useQuery({ queryKey: ["case", caseId], queryFn: () => getCase(caseId) });
@@ -41,8 +42,17 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
       <CaseHeader analysis={data} />
-      <RiskHero risk={data.risk} />
-      <ExplainableRisk signals={data.risk.signals} />
+      {data.risk ? (
+        <>
+          <RiskHero risk={data.risk} />
+          <ExplainableRisk signals={data.risk.signals} />
+        </>
+      ) : (
+        <Panel className="p-6 text-sm text-muted-foreground">
+          Risk scoring is not available for this partial analysis. Missing data is not treated as
+          safe.
+        </Panel>
+      )}
 
       <div>
         <InvestigationTabs active={tab} onChange={setTab} />
@@ -70,7 +80,7 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
   );
 }
 
-function CaseHeader({ analysis }: { analysis: EmailAnalysis }) {
+function CaseHeader({ analysis }: { analysis: AnalysisViewModel }) {
   const meta = [
     { label: "Subject", value: analysis.email.subject },
     { label: "Sender", value: analysis.email.sender },
@@ -110,15 +120,17 @@ function CaseHeader({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function OverviewTab({ analysis }: { analysis: EmailAnalysis }) {
+function OverviewTab({ analysis }: { analysis: AnalysisViewModel }) {
   const auth = analysis.authentication;
   const detected = analysis.ai_findings.filter((f) => f.detected);
 
   return (
     <div className="grid gap-4 xl:grid-cols-3">
-      <Panel className="p-6 xl:col-span-2">
+      <Panel spotlight tilt className="p-6 xl:col-span-2">
         <SectionHeader eyebrow="Assessment" title="Threat Summary" />
-        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{analysis.risk.summary}</p>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+          {analysis.risk?.summary ?? "Risk scoring is unavailable for this partial analysis."}
+        </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -137,10 +149,10 @@ function OverviewTab({ analysis }: { analysis: EmailAnalysis }) {
               Risk Breakdown
             </p>
             <ul className="mt-2 space-y-1.5">
-              {analysis.risk.signals.slice(0, 5).map((s) => (
-                <li key={s.label} className="flex justify-between text-xs text-foreground/85">
-                  <span className="truncate pr-3">{s.label}</span>
-                  <span className="font-mono text-accent">+{s.weight}</span>
+              {(analysis.risk?.signals ?? []).slice(0, 5).map((s) => (
+                <li key={s.code} className="flex justify-between text-xs text-foreground/85">
+                  <span className="truncate pr-3">{s.description}</span>
+                  <span className="font-mono text-accent">+{s.points}</span>
                 </li>
               ))}
             </ul>
@@ -148,7 +160,7 @@ function OverviewTab({ analysis }: { analysis: EmailAnalysis }) {
         </div>
       </Panel>
 
-      <Panel className="p-6">
+      <Panel spotlight tilt className="p-6">
         <SectionHeader eyebrow="Message" title="Email Summary" />
         <dl className="mt-4 space-y-3">
           {[
@@ -167,7 +179,7 @@ function OverviewTab({ analysis }: { analysis: EmailAnalysis }) {
         </dl>
       </Panel>
 
-      <Panel className="p-6">
+      <Panel spotlight tone="danger" className="p-6">
         <SectionHeader eyebrow="Sender validation" title="Authentication Summary" />
         <div className="mt-4 grid grid-cols-3 divide-x divide-border text-center">
           {(
@@ -197,7 +209,7 @@ function OverviewTab({ analysis }: { analysis: EmailAnalysis }) {
         </div>
       </Panel>
 
-      <Panel className="p-6 xl:col-span-2">
+      <Panel spotlight tone="network" className="p-6 xl:col-span-2">
         <SectionHeader eyebrow="Network" title="Infrastructure Summary" />
         <div className="mt-4 space-y-2">
           {analysis.infrastructure.nodes.map((node) => (
@@ -220,7 +232,7 @@ function OverviewTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function ForensicsTab({ analysis }: { analysis: EmailAnalysis }) {
+function ForensicsTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <HeaderPanel email={analysis.email} />
@@ -232,7 +244,7 @@ function ForensicsTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function AuthenticationTab({ analysis }: { analysis: EmailAnalysis }) {
+function AuthenticationTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <AuthenticationCard name="SPF" check={analysis.authentication.spf} index={0} />
@@ -242,7 +254,7 @@ function AuthenticationTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
+function IndicatorsTab({ analysis }: { analysis: AnalysisViewModel }) {
   const { ips, domains, urls, attachments } = analysis.indicators;
 
   return (
@@ -252,15 +264,21 @@ function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
         title="IP Addresses"
         rows={ips}
         columns={[
-          { header: "IP Address", render: (r) => <span className="font-mono text-xs">{r.ip}</span> },
+          {
+            header: "IP Address",
+            render: (r) => <span className="font-mono text-xs">{r.ip}</span>,
+          },
           {
             header: "Reputation",
             render: (r) => <ThreatBadge label={r.reputation} tone={reputationTone(r.reputation)} />,
           },
-          { header: "Source", render: (r) => <span className="text-xs text-muted-foreground">{r.source}</span> },
+          {
+            header: "Source",
+            render: (r) => <span className="text-xs text-muted-foreground">{r.source}</span>,
+          },
           {
             header: "Actions",
-            render: (r) => <CopyValue value={r.ip} />,
+            render: (r) => <CopyValue value={r.ip} revealOnRowHover />,
           },
         ]}
       />
@@ -270,12 +288,18 @@ function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
         title="Domains"
         rows={domains}
         columns={[
-          { header: "Domain", render: (r) => <span className="font-mono text-xs">{r.domain}</span> },
+          {
+            header: "Domain",
+            render: (r) => <span className="font-mono text-xs">{r.domain}</span>,
+          },
           {
             header: "Reputation",
             render: (r) => <ThreatBadge label={r.reputation} tone={reputationTone(r.reputation)} />,
           },
-          { header: "Type", render: (r) => <span className="text-xs text-muted-foreground">{r.type}</span> },
+          {
+            header: "Type",
+            render: (r) => <span className="text-xs text-muted-foreground">{r.type}</span>,
+          },
         ]}
       />
 
@@ -293,7 +317,10 @@ function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
               </span>
             ),
           },
-          { header: "Domain", render: (r) => <span className="font-mono text-xs">{r.domain}</span> },
+          {
+            header: "Domain",
+            render: (r) => <span className="font-mono text-xs">{r.domain}</span>,
+          },
           {
             header: "Reputation",
             render: (r) => <ThreatBadge label={r.reputation} tone={reputationTone(r.reputation)} />,
@@ -309,7 +336,9 @@ function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
           { header: "Filename", render: (r) => <span className="text-xs">{r.filename}</span> },
           {
             header: "MIME Type",
-            render: (r) => <span className="font-mono text-xs text-muted-foreground">{r.mime_type}</span>,
+            render: (r) => (
+              <span className="font-mono text-xs text-muted-foreground">{r.mime_type}</span>
+            ),
           },
           {
             header: "Size",
@@ -322,7 +351,7 @@ function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
           {
             header: "SHA-256",
             className: "max-w-[260px]",
-            render: (r) => <CopyValue value={r.sha256} truncate />,
+            render: (r) => <CopyValue value={r.sha256} truncate revealOnRowHover />,
           },
           {
             header: "Status",
@@ -334,7 +363,7 @@ function IndicatorsTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function InfrastructureTab({ analysis }: { analysis: EmailAnalysis }) {
+function InfrastructureTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
     <div className="space-y-4">
       <SectionHeader eyebrow="Network" title="Observed Email Infrastructure" />
@@ -344,6 +373,7 @@ function InfrastructureTab({ analysis }: { analysis: EmailAnalysis }) {
           {analysis.infrastructure.disclaimer}
         </p>
       </Panel>
+      <InfrastructureRouteVisual nodes={analysis.infrastructure.nodes} />
       <div>
         {analysis.infrastructure.nodes.map((node, i) => (
           <InfrastructureHop
@@ -358,7 +388,7 @@ function InfrastructureTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function FindingsTab({ analysis }: { analysis: EmailAnalysis }) {
+function FindingsTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {analysis.ai_findings.map((finding, i) => (
@@ -368,9 +398,9 @@ function FindingsTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function TimelineTab({ analysis }: { analysis: EmailAnalysis }) {
+function TimelineTab({ analysis }: { analysis: AnalysisViewModel }) {
   return (
-    <Panel className="max-w-2xl p-6">
+    <Panel spotlight className="max-w-2xl p-6">
       <SectionHeader eyebrow="Chronology" title="Forensic Timeline" />
       <div className="mt-6">
         {analysis.timeline.map((event, i) => (
@@ -386,7 +416,7 @@ function TimelineTab({ analysis }: { analysis: EmailAnalysis }) {
   );
 }
 
-function EvidenceTab({ analysis }: { analysis: EmailAnalysis }) {
+function EvidenceTab({ analysis }: { analysis: AnalysisViewModel }) {
   const { evidence } = analysis;
 
   return (

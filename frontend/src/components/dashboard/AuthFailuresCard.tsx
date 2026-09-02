@@ -15,7 +15,7 @@ export function AuthFailuresCard({
   ];
 
   return (
-    <Panel interactive className="h-full p-5">
+    <Panel interactive spotlight tilt tone="danger" className="h-full p-5">
       <SectionHeader eyebrow="Last 30 days" title="Authentication Failures" />
       <div className="mt-6 grid grid-cols-3 divide-x divide-border">
         {rows.map((row) => (
