@@ -174,7 +174,7 @@ class ReportLabReportingService(ReportingService):
                     att_data.append([
                         _safe(att.filename),
                         _safe(att.content_type),
-                        str(att.size),
+                        str(att.size_bytes),
                         _safe(att.sha256)
                     ])
                 story.append(self._build_table(att_data, cell_style, header=True))

@@ -1,0 +1,170 @@
+Delivered-To: designerhawk12@gmail.com
+Received: by 2002:adf:e0d0:0:b0:482:c3fd:17d6 with SMTP id m16csp2284669wri;
+        Mon, 31 Aug 2026 10:05:02 -0700 (PDT)
+X-Received: by 2002:a05:6a00:3693:b0:845:3033:6cb7 with SMTP id d2e1a72fcca58-85b5a05e9a3mr3733077b3a.9.1788195901945;
+        Mon, 31 Aug 2026 10:05:01 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788195901; cv=none;
+        d=google.com; s=arc-20260327;
+        b=JerUUySoeJnJOtNotmoZZsGGoA2mEn3C1qr5urZb0ckmkPAxnrsEdsKTUzz0j4R3jw
+         FEPiuZXDJzHpuh0OXOsm03NTH5pE/M74WhUj6nZZJacvvW5L4KDGJjkXh3d7jnjCWoP9
+         O2Dfd1Rcx85CF52LK3tCZcb0rRDhINFYGXD5LfEZmKAjej/Hhv6I/+vjHohO7AM9pTyy
+         jN28pcFQ1L7rcL/ZKn+DT03mWGe5ZXLDZxgww/ai6Kt95CqflVnIzrInhkouVmUDkW38
+         uCqNzXVWFPyrNG4Dv0dZ2ZEEA2mbTafu6i9c1OA9L1SMD7aC06/GOsBiEgsTU21vQOah
+         Ti2A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=list-unsubscribe:mime-version:subject:message-id:reply-to:to:from
+         :date:dkim-signature:dkim-signature:feedback-id;
+        bh=4JeN/DDScxLW1vAGjYQ/dIQClRwTC1sR/Mkw490iwHo=;
+        fh=iVK8p7I6WwwBumT+r6HMWAH6yTDlhShTuDF7qAlS7zw=;
+        b=H9kmbavBl7H7bfrE6vzaOG3ZZMq099wpNUJtwk7fK4GWnYJ8NL6bi4ulAhPX5o1+gz
+         fLwEiAL1MyhG0v0MFnlcX6OJU1DwxsKGaeIm5TMX/mXpvE8tGH5jVxTbzn9WHoGAAxe3
+         Wi5JnHcbMyw6JY/Qr2kRRH3rTHINxnUgzXzXPUqo5QHu++Vc9WbbHEnGc6THRhCxLh6l
+         4ccebJ6qNanGe+8b+eNJCMa8z70ah1M+qdJX/ETfi2oyLjhbgmn78+lha3Frg15t0KDn
+         FU5n7A5ulWntCMwExDrZVKxJBtz0i1pEPlqaGeZ0dctU6WAS5ikLI3+k1GYLXKNtBLCX
+         4sWg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@mcpcnserver.com header.s=aliyun-cn-hangzhou57fb2d3494 header.b=JcjCt33Q;
+       dkim=pass header.i=@dm-fbl.aliyuncs.com header.s=feedback header.b=q5gqplbh;
+       spf=pass (google.com: domain of market@mcpcnserver.com designates 47.90.196.20 as permitted sender) smtp.mailfrom=market@mcpcnserver.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=mcpcnserver.com
+Return-Path: <market@mcpcnserver.com>
+Received: from out196-20.us.a.dm.aliyun.com (out196-20.us.a.dm.aliyun.com. [47.90.196.20])
+        by mx.google.com with ESMTPS id d2e1a72fcca58-85b943bf79csi744225b3a.180.2026.08.31.10.05.00
+        for <designerhawk12@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 31 Aug 2026 10:05:01 -0700 (PDT)
+Received-SPF: pass (google.com: domain of market@mcpcnserver.com designates 47.90.196.20 as permitted sender) client-ip=47.90.196.20;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@mcpcnserver.com header.s=aliyun-cn-hangzhou57fb2d3494 header.b=JcjCt33Q;
+       dkim=pass header.i=@dm-fbl.aliyuncs.com header.s=feedback header.b=q5gqplbh;
+       spf=pass (google.com: domain of market@mcpcnserver.com designates 47.90.196.20 as permitted sender) smtp.mailfrom=market@mcpcnserver.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=mcpcnserver.com
+X-AliDM-RcptTo: ZGVzaWduZXJoYXdrMTJAZ21haWwuY29t
+Feedback-ID: default:market@mcpcnserver.com:alibabak_ApiBatch:448107
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=mcpcnserver.com; s=aliyun-cn-hangzhou57fb2d3494;
+	t=1788195898; h=Date:From:To:Message-ID:Subject:MIME-Version:List-Unsubscribe:Content-Type;
+	bh=4JeN/DDScxLW1vAGjYQ/dIQClRwTC1sR/Mkw490iwHo=;
+	b=JcjCt33QcatnvkHvXIU8NvUXB4Fy3RlTDZnzfKGPSfYrQwh7ppcKB8oZufC9hDjGKLGfWQ0MUMri1KFLWgI+UEiOsp9e485yVx2+t7HzSBjh5FepVn3cQoGjwaGxT/EVDxYyCUpjB7GI1JxwVbYqc85Y98C+p1/E39BsqXFhjnk=
+DKIM-Signature:v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=dm-fbl.aliyuncs.com; s=feedback;
+	t=1788195898; h=Date:From:To:Message-ID:Subject:MIME-Version:List-Unsubscribe:Content-Type;
+	bh=4JeN/DDScxLW1vAGjYQ/dIQClRwTC1sR/Mkw490iwHo=;
+	b=q5gqplbhGjjWU+LwQNEe7FdrlxRkO0OZXBAO/WgKaCWc888DhHrKwlugVXeKpgOf+Hc558tztXqrq5IILOSlrRIRl70jslARVT/CnIrc6iUrXY+LVSnoT0rblMtEd4uIw2vxQB7WlUxbnRYlxtONk7SIargEztTXAaUBY5ezGOM=
+Received: from chitu-hsf(mailfrom:market@mcpcnserver.com fp:ma_600000349246369893 cluster:AY35D)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Tue, 01 Sep 2026 01:04:58 +0800
+Date: Tue, 01 Sep 2026 01:04:58 +0800
+From: "NiubiStar / ResultGenie" <market@mcpcnserver.com>
+Return-Path: "NiubiStar / ResultGenie" <market@mcpcnserver.com>
+To:  <designerhawk12@gmail.com>
+Reply-To:  <feitechen@gmail.com>
+Message-ID: <db08e4af-dd52-4b77-9d50-1b75bfbd4cfa@alibaba.com>
+Subject: =?UTF-8?B?UmVzdWx0R2VuaWU6IHZlcmlmaWVkIG1hcmtldGluZyBvdXRjb21lcyBmcm9tIE5pdWJpU3Rh?=
+  =?UTF-8?B?cg==?=
+X-Priority: 3
+MIME-Version: 1.0
+X-EnvId: 600000349246369894
+X-AliDM-Settings: eyJPdXRib3VuZElwIjp7IklwTGlzdCI6W10sIklwUG9vbElkIjoiIn0sIlVuc3Vic2NyaWJlIjp7IkZpbHRlckxldmVsIjoiZGVmYXVsdCIsIkxpbmtUeXBlIjoiZGVmYXVsdCJ9LCJWZXJzaW9uIjoiMS4wIn0=
+List-Unsubscribe: <https://www.niubistar.com/unsubscribe?email=designerhawk12%40gmail.com&token=outreach>
+Content-Type: multipart/alternative;
+  boundary="----=ALIBOUNDARY_2347_7f86a6e38700_6a95b43a_6862a"
+
+------=ALIBOUNDARY_2347_7f86a6e38700_6a95b43a_6862a
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi,=0A=0AI work with NiubiStar and ResultGenie. We help developer-facing produ=
+cts turn launches and marketing work into verifiable deliverables instead of v=
+ague activity reports.=0A=0AResultGenie is built for AI, SaaS, open-source, an=
+d startup teams that want practical distribution support around a specific rel=
+ease or growth window.=0A=0ACommon deliverables include:=0A=0AAI / SaaS / star=
+tup directory submission=0ASEO article publishing and backlink placement=0APro=
+duct Hunt and developer community launch support=0AReddit, Hacker News, and te=
+chnical community monitoring=0AGitHub Issue / Pull Request discovery where it =
+is relevant and appropriate=0A=0AEvery order is manually reviewed and delivere=
+d with proof such as public URLs, screenshots, delivery reports, timestamps, a=
+nd execution notes.=0A=0AIf you are preparing a product launch or trying to cr=
+eate clearer public proof around a developer-facing product, you can review th=
+e available results here:=0A=0Ahttps://resultgenie.com/=0A=0AIf this is not re=
+levant, reply "stop" and we will remove this address from future outreach.=0A=0A=
+Best,=0AAlbert Zhao=0ANiubiStar / ResultGenie=0A=0AUnsubscribe: https://www.ni=
+ubistar.com/unsubscribe?email=3Ddesignerhawk12%40gmail.com&token=3Doutreach
+------=ALIBOUNDARY_2347_7f86a6e38700_6a95b43a_6862a
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<!doctype html><html><body style=3D"margin:0;padding:0;background:#eef2f7;font=
+-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;co=
+lor:#111827;"><div style=3D"display:none;max-height:0;overflow:hidden;color:#e=
+ef2f7;">Developer marketing, launch planning, content placement, outreach exec=
+ution, and proof reporting.</div><table role=3D"presentation" width=3D"100%" c=
+ellspacing=3D"0" cellpadding=3D"0" style=3D"background:#eef2f7;"><tr><td align=
+=3D"center" style=3D"padding:34px 16px;"><table role=3D"presentation" width=3D=
+"100%" cellspacing=3D"0" cellpadding=3D"0" style=3D"max-width:700px;background=
+:#ffffff;border:1px solid #d8dee9;border-radius:18px;overflow:hidden;box-shado=
+w:0 22px 58px rgba(15,23,42,0.12);"><tr><td style=3D"height:7px;background:lin=
+ear-gradient(90deg,#0f172a 0%,#2563eb 46%,#14b8a6 100%);"></td></tr><tr><td st=
+yle=3D"padding:26px 30px 10px;"><table role=3D"presentation" width=3D"100%" ce=
+llspacing=3D"0" cellpadding=3D"0"><tr><td style=3D"vertical-align:middle;"><a =
+href=3D"https://resultgenie.com/" target=3D"_blank" rel=3D"noopener noreferrer=
+" style=3D"font-size:22px;font-weight:850;color:#0f172a;text-decoration:none;l=
+etter-spacing:0;">ResultGenie</a><div style=3D"margin-top:5px;color:#64748b;fo=
+nt-size:13px;">Developer marketing for open-source and technical products</div=
+></td><td align=3D"right" style=3D"vertical-align:middle;"><a href=3D"https://=
+www.niubistar.com/unsubscribe?email=3Ddesignerhawk12%40gmail.com&amp;token=3Do=
+utreach" target=3D"_blank" rel=3D"noopener noreferrer" style=3D"display:inline=
+-block;padding:8px 12px;border:1px solid #cbd5e1;border-radius:999px;color:#47=
+5569;font-size:13px;text-decoration:none;">Unsubscribe</a></td></tr></table></=
+td></tr><tr><td style=3D"padding:10px 30px 28px;"><h1 style=3D"margin:0 0 10px=
+;color:#0f172a;font-size:25px;line-height:1.26;letter-spacing:0;">ResultGenie:=
+ verified marketing outcomes from NiubiStar</h1><p style=3D"margin:0 0 22px;co=
+lor:#475569;font-size:14px;line-height:1.7;">A practical promotion service: po=
+sitioning, content placement, developer outreach, and delivery records.</p><di=
+v style=3D"padding:18px 18px 4px;background:#f8fafc;border:1px solid #e2e8f0;b=
+order-radius:14px;"><p style=3D"margin:0 0 16px;color:#111827;font-size:15px;l=
+ine-height:1.78;">Hi,</p>=0A<p style=3D"margin:0 0 16px;color:#111827;font-siz=
+e:15px;line-height:1.78;">I work with NiubiStar and ResultGenie. We help devel=
+oper-facing products turn launches and marketing work into verifiable delivera=
+bles instead of vague activity reports.</p>=0A<p style=3D"margin:0 0 16px;colo=
+r:#111827;font-size:15px;line-height:1.78;">ResultGenie is built for AI, SaaS,=
+ open-source, and startup teams that want practical distribution support aroun=
+d a specific release or growth window.</p>=0A<p style=3D"margin:0 0 16px;color=
+:#111827;font-size:15px;line-height:1.78;">Common deliverables include:</p>=0A=
+<p style=3D"margin:0 0 16px;color:#111827;font-size:15px;line-height:1.78;">AI=
+ / SaaS / startup directory submission<br>SEO article publishing and backlink =
+placement<br>Product Hunt and developer community launch support<br>Reddit, Ha=
+cker News, and technical community monitoring<br>GitHub Issue / Pull Request d=
+iscovery where it is relevant and appropriate</p>=0A<p style=3D"margin:0 0 16p=
+x;color:#111827;font-size:15px;line-height:1.78;">Every order is manually revi=
+ewed and delivered with proof such as public URLs, screenshots, delivery repor=
+ts, timestamps, and execution notes.</p>=0A<p style=3D"margin:0 0 16px;color:#=
+111827;font-size:15px;line-height:1.78;">If you are preparing a product launch=
+ or trying to create clearer public proof around a developer-facing product, y=
+ou can review the available results here:</p>=0A<p style=3D"margin:0 0 16px;co=
+lor:#111827;font-size:15px;line-height:1.78;">https://resultgenie.com/</p>=0A<=
+p style=3D"margin:0 0 16px;color:#111827;font-size:15px;line-height:1.78;">If =
+this is not relevant, reply &quot;stop&quot; and we will remove this address f=
+rom future outreach.</p>=0A<p style=3D"margin:0 0 16px;color:#111827;font-size=
+:15px;line-height:1.78;">Best,<br>Albert Zhao<br>NiubiStar / ResultGenie</p></=
+div><div style=3D"margin:24px 0 8px;"><a href=3D"https://resultgenie.com/" tar=
+get=3D"_blank" rel=3D"noopener noreferrer" style=3D"display:inline-block;backg=
+round:#0f172a;color:#ffffff;padding:13px 18px;border-radius:10px;font-size:15p=
+x;font-weight:800;text-decoration:none;">Review ResultGenie</a></div><div styl=
+e=3D"margin-top:24px;padding-top:18px;border-top:1px solid #e2e8f0;"><p style=3D=
+"margin:0 0 10px;color:#64748b;font-size:13px;line-height:1.7;">ResultGenie re=
+spects email preferences. Reply "stop" or use the unsubscribe link to be remov=
+ed from future outreach.</p><a href=3D"https://www.niubistar.com/unsubscribe?e=
+mail=3Ddesignerhawk12%40gmail.com&amp;token=3Doutreach" target=3D"_blank" rel=3D=
+"noopener noreferrer" style=3D"color:#64748b;font-size:13px;text-decoration:un=
+derline;">Unsubscribe</a></div></td></tr></table></td></tr></table><div style=3D=
+"margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;"><p style=3D"m=
+argin:0 0 8px;color:#667085;font-size:14px;">You are receiving this email beca=
+use you subscribed to updates from market.</p><p style=3D"margin:0;color:#6670=
+85;font-size:14px;">If you no longer want to receive these emails, <a href=3D"=
+https://www.niubistar.com/unsubscribe?email=3Ddesignerhawk12%40gmail.com&token=
+=3Doutreach" style=3D"color:#2563eb;text-decoration:underline;">unsubscribe he=
+re</a>.</p></div></body></html>
+------=ALIBOUNDARY_2347_7f86a6e38700_6a95b43a_6862a--
+
