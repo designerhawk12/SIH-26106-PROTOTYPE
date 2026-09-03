@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, TypeVar
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
@@ -34,6 +35,22 @@ from ..dependencies import (
 from ...services.export.interfaces import EvidenceExportService
 
 router = APIRouter(prefix="/api/v1/cases", tags=["Cases"])
+T = TypeVar("T")
+
+
+async def _run_database_operation(
+    operation: Callable[..., T], *args: object, **kwargs: object
+) -> T:
+    """Run repository work without leaking connection details on failure."""
+
+    try:
+        return await run_in_threadpool(operation, *args, **kwargs)
+    except Exception as exc:
+        raise AppError(
+            status_code=503,
+            code="DATABASE_UNAVAILABLE",
+            message="Case persistence is temporarily unavailable.",
+        ) from exc
 
 
 def _case_subject(analysis_json: dict[str, Any]) -> str | None:
@@ -76,14 +93,7 @@ async def analyze_case(
             message="The uploaded file could not be parsed as an email.",
             field="file",
         ) from exc
-    try:
-        await run_in_threadpool(repository.create, analysis)
-    except Exception as exc:
-        raise AppError(
-            status_code=500,
-            code="CASE_PERSISTENCE_FAILED",
-            message="The analysis could not be stored.",
-        ) from exc
+    await _run_database_operation(repository.create, analysis)
     return AnalyzeCaseResponse(analysis=analysis)
 
 
@@ -93,8 +103,8 @@ async def list_cases(
     limit: Annotated[int, Query(ge=1, le=100)] = 25,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> CaseListResponse:
-    rows = await run_in_threadpool(repository.list, limit=limit, offset=offset)
-    total = await run_in_threadpool(repository.count)
+    rows = await _run_database_operation(repository.list, limit=limit, offset=offset)
+    total = await _run_database_operation(repository.count)
     items = tuple(
         CaseSummary(
             case_id=row.id,
@@ -116,7 +126,7 @@ async def get_case(
     case_id: UUID,
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
 ) -> EmailAnalysis:
-    analysis = await run_in_threadpool(repository.get_analysis, case_id)
+    analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
         raise AppError(
             status_code=404,
@@ -132,7 +142,7 @@ async def get_case_report(
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
     reporting: Annotated[ReportingService, Depends(get_reporting_service)],
 ) -> Response:
-    analysis = await run_in_threadpool(repository.get_analysis, case_id)
+    analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
         raise AppError(
             status_code=404,
@@ -168,7 +178,7 @@ async def get_case_evidence(
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
     export_svc: Annotated[EvidenceExportService, Depends(get_export_service)],
 ) -> Response:
-    analysis = await run_in_threadpool(repository.get_analysis, case_id)
+    analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
         raise AppError(
             status_code=404,

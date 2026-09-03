@@ -7,6 +7,7 @@ from typing import Protocol
 from uuid import UUID
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from ..schemas import EmailAnalysis
@@ -48,8 +49,12 @@ class SqlAlchemyCaseRepository:
             analysis_json=analysis.model_dump(mode="json"),
         )
         self._session.add(row)
-        self._session.commit()
-        self._session.refresh(row)
+        try:
+            self._session.commit()
+            self._session.refresh(row)
+        except SQLAlchemyError:
+            self._session.rollback()
+            raise
         return row
 
     def get(self, case_id: UUID) -> Case | None:
