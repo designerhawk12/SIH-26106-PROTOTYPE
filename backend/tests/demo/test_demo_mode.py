@@ -26,6 +26,7 @@ from backend.app.services.threat_intel import (
     DemoThreatIntelProvider,
 )
 from backend.main import create_app
+from backend.tests.auth_helpers import AUTH_HEADERS, FakeIdentityVerifier
 
 FIXTURES = Path(__file__).parents[3] / "fixtures" / "emails"
 
@@ -176,10 +177,11 @@ def test_api_uses_explicit_demo_setting_and_persists_labelled_results(
     raw_email = _fixture("02_phishing.eml")
     app = create_app(
         settings=Settings(demo_mode=True, database_url="sqlite://"),
+        identity_verifier=FakeIdentityVerifier(),
         database_engine=create_database_engine("sqlite://"),
     )
 
-    with TestClient(app) as client:
+    with TestClient(app, headers=AUTH_HEADERS) as client:
         response = client.post(
             "/api/v1/cases/analyze",
             files={"file": ("02_phishing.eml", raw_email, "message/rfc822")},

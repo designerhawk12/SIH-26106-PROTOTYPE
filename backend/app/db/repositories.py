@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import json
-from typing import Protocol
+from typing import Any, Protocol
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from ..schemas import EmailAnalysis
-from .models import Case
+from ..schemas import EmailAnalysis, UpdateProfileRequest, UserProfile, UserRole
+from ..services.auth.interfaces import AuthenticatedIdentity
+from ..services.auth.rbac import permissions_for_role
+from .models import Case, UserProfileRecord
 
 
 class CaseRepository(Protocol):
@@ -74,4 +76,121 @@ class SqlAlchemyCaseRepository:
 
     def count(self) -> int:
         return int(self._session.scalar(select(func.count()).select_from(Case)) or 0)
+
+
+class UserProfileRepository(Protocol):
+    def get_or_create(self, identity: AuthenticatedIdentity) -> UserProfile: ...
+
+    def get(self, user_id: UUID) -> UserProfile | None: ...
+
+    def list(self) -> tuple[UserProfile, ...]: ...
+
+    def update_profile(
+        self, user_id: UUID, update: UpdateProfileRequest
+    ) -> UserProfile | None: ...
+
+    def update_role(self, user_id: UUID, role: UserRole) -> UserProfile | None: ...
+
+
+def _metadata_text(metadata: dict[str, Any], *keys: str, limit: int) -> str | None:
+    for key in keys:
+        value = metadata.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()[:limit]
+    return None
+
+
+def _profile_schema(row: UserProfileRecord) -> UserProfile:
+    role = UserRole(row.role)
+    return UserProfile(
+        user_id=row.user_id,
+        display_name=row.display_name,
+        email=row.email,
+        organization=row.organization,
+        role=role,
+        permissions=permissions_for_role(role),
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+class SqlAlchemyUserProfileRepository:
+    """Store authorization roles separately from user-editable Auth metadata."""
+
+    def __init__(self, session: Session) -> None:
+        self._session = session
+
+    def get_or_create(self, identity: AuthenticatedIdentity) -> UserProfile:
+        existing = self._session.get(UserProfileRecord, identity.user_id)
+        if existing is not None:
+            if existing.email != identity.email:
+                existing.email = identity.email
+                self._commit()
+            return _profile_schema(existing)
+
+        display_name = _metadata_text(
+            identity.user_metadata, "display_name", "full_name", "name", limit=120
+        ) or identity.email.split("@", 1)[0][:120]
+        organization = _metadata_text(
+            identity.user_metadata, "organization", "team", limit=160
+        )
+        row = UserProfileRecord(
+            user_id=identity.user_id,
+            display_name=display_name,
+            email=identity.email,
+            organization=organization,
+            role=UserRole.ANALYST.value,
+        )
+        self._session.add(row)
+        try:
+            self._session.commit()
+            self._session.refresh(row)
+        except IntegrityError:
+            self._session.rollback()
+            concurrent = self._session.get(UserProfileRecord, identity.user_id)
+            if concurrent is None:
+                raise
+            row = concurrent
+        except SQLAlchemyError:
+            self._session.rollback()
+            raise
+        return _profile_schema(row)
+
+    def get(self, user_id: UUID) -> UserProfile | None:
+        row = self._session.get(UserProfileRecord, user_id)
+        return _profile_schema(row) if row is not None else None
+
+    def list(self) -> tuple[UserProfile, ...]:
+        statement = select(UserProfileRecord).order_by(
+            UserProfileRecord.created_at.asc()
+        )
+        return tuple(_profile_schema(row) for row in self._session.scalars(statement))
+
+    def update_profile(
+        self, user_id: UUID, update: UpdateProfileRequest
+    ) -> UserProfile | None:
+        row = self._session.get(UserProfileRecord, user_id)
+        if row is None:
+            return None
+        if update.display_name is not None:
+            row.display_name = update.display_name.strip()
+        if update.organization is not None:
+            row.organization = update.organization.strip() or None
+        self._commit()
+        return _profile_schema(row)
+
+    def update_role(self, user_id: UUID, role: UserRole) -> UserProfile | None:
+        row = self._session.get(UserProfileRecord, user_id)
+        if row is None:
+            return None
+        row.role = role.value
+        self._commit()
+        return _profile_schema(row)
+
+    def _commit(self) -> None:
+        try:
+            self._session.commit()
+        except SQLAlchemyError:
+            self._session.rollback()
+            raise
 

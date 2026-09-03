@@ -1,5 +1,7 @@
 /** Central API access and contract-to-presentation mapping. */
 import { sampleAnalysis, sampleCases, sampleStats } from "@/mocks/sampleAnalysis";
+import { supabase } from "@/integrations/supabase/client";
+import type { UserProfile } from "@/types/auth";
 import type {
   AnalysisViewModel,
   AnalyzeCaseResponse,
@@ -17,9 +19,7 @@ import type {
   ReputationVerdict,
 } from "@/types/analysis";
 
-export const API_BASE_URL: string = (
-  import.meta.env.VITE_API_BASE_URL ?? ""
-).replace(/\/+$/, "");
+export const API_BASE_URL: string = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === "true";
 
@@ -63,10 +63,16 @@ async function request(path: string, init?: RequestInit, timeoutMs = 15_000): Pr
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    const { data } = await supabase.auth.getSession();
+    const headers = new Headers(init?.headers);
+    headers.set("Accept", headers.get("Accept") ?? "application/json");
+    if (data.session?.access_token) {
+      headers.set("Authorization", `Bearer ${data.session.access_token}`);
+    }
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...init,
       signal: init?.signal ?? controller.signal,
-      headers: { Accept: "application/json", ...(init?.headers ?? {}) },
+      headers,
     });
     if (!response.ok) throw await errorFromResponse(response);
     return response;
@@ -78,6 +84,10 @@ async function request(path: string, init?: RequestInit, timeoutMs = 15_000): Pr
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function getCurrentUser(): Promise<UserProfile> {
+  return requestJson<UserProfile>("/api/v1/auth/me");
 }
 
 async function requestJson<T>(path: string, init?: RequestInit, timeoutMs?: number): Promise<T> {

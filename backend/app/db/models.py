@@ -35,3 +35,23 @@ class Case(Base):
     severity: Mapped[str | None] = mapped_column(String(16), nullable=True)
     analysis_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
 
+
+class UserProfileRecord(Base):
+    """Application authorization profile linked to a Supabase Auth user ID."""
+
+    __tablename__ = "user_profiles"
+
+    user_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)
+    display_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True, index=True)
+    organization: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    role: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="ANALYST", server_default="ANALYST", index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+

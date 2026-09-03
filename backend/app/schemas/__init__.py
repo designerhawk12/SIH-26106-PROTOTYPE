@@ -1,6 +1,14 @@
 """Authoritative public exports for shared contracts."""
 
 from .analysis import EmailAnalysis, TimelineEvent
+from .auth import (
+    Permission,
+    UpdateProfileRequest,
+    UpdateRoleRequest,
+    UserListResponse,
+    UserProfile,
+    UserRole,
+)
 from .api import (
     AnalyzeCaseResponse,
     CaseListResponse,
@@ -61,6 +69,7 @@ __all__ = [
     "MailboxAddress",
     "MimePart",
     "ParsedEmail",
+    "Permission",
     "ReceivedHop",
     "ReputationVerdict",
     "RiskLevel",
@@ -71,5 +80,9 @@ __all__ = [
     "ThreatIntelResult",
     "TimelineEvent",
     "TimelineEventType",
+    "UpdateProfileRequest",
+    "UpdateRoleRequest",
+    "UserListResponse",
+    "UserProfile",
+    "UserRole",
 ]
-

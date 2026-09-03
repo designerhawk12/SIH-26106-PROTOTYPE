@@ -20,19 +20,22 @@ from ...schemas import (
     CaseListResponse,
     CaseSummary,
     EmailAnalysis,
+    Permission,
     RiskLevel,
+    UserProfile,
 )
+from ...services.export.interfaces import EvidenceExportService
 from ...services.orchestrator import EmailAnalysisError
 from ...services.orchestrator.interfaces import AnalysisOrchestrator
 from ...services.reporting.interfaces import ReportingService
 from ..dependencies import (
     get_analysis_orchestrator,
     get_case_repository,
-    get_reporting_service,
     get_export_service,
+    get_reporting_service,
     get_runtime_settings,
+    require_permission,
 )
-from ...services.export.interfaces import EvidenceExportService
 
 router = APIRouter(prefix="/api/v1/cases", tags=["Cases"])
 T = TypeVar("T")
@@ -81,6 +84,9 @@ async def analyze_case(
     settings: Annotated[Settings, Depends(get_runtime_settings)],
     orchestrator: Annotated[AnalysisOrchestrator, Depends(get_analysis_orchestrator)],
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
+    _user: Annotated[
+        UserProfile, Depends(require_permission(Permission.ANALYZE_EMAILS))
+    ],
 ) -> AnalyzeCaseResponse:
     filename = safe_eml_filename(file.filename)
     raw_email = await read_bounded_upload(file, settings.max_upload_bytes)
@@ -100,6 +106,9 @@ async def analyze_case(
 @router.get("", response_model=CaseListResponse)
 async def list_cases(
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
+    _user: Annotated[
+        UserProfile, Depends(require_permission(Permission.INSPECT_CASES))
+    ],
     limit: Annotated[int, Query(ge=1, le=100)] = 25,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> CaseListResponse:
@@ -125,6 +134,9 @@ async def list_cases(
 async def get_case(
     case_id: UUID,
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
+    _user: Annotated[
+        UserProfile, Depends(require_permission(Permission.INSPECT_CASES))
+    ],
 ) -> EmailAnalysis:
     analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
@@ -141,6 +153,9 @@ async def get_case_report(
     case_id: UUID,
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
     reporting: Annotated[ReportingService, Depends(get_reporting_service)],
+    _user: Annotated[
+        UserProfile, Depends(require_permission(Permission.GENERATE_REPORTS))
+    ],
 ) -> Response:
     analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
@@ -177,6 +192,9 @@ async def get_case_evidence(
     case_id: UUID,
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
     export_svc: Annotated[EvidenceExportService, Depends(get_export_service)],
+    _user: Annotated[
+        UserProfile, Depends(require_permission(Permission.EXPORT_EVIDENCE))
+    ],
 ) -> Response:
     analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:

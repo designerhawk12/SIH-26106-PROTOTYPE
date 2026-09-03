@@ -22,6 +22,7 @@ from backend.app.services.email_forensics import EmailForensicsParser
 from backend.app.services.orchestrator import AnalysisPipelineOrchestrator
 from backend.app.services.risk import DeterministicRiskEngine
 from backend.main import create_app
+from backend.tests.auth_helpers import AUTH_HEADERS, FakeIdentityVerifier
 
 FIXTURES = Path(__file__).parents[3] / "fixtures" / "emails"
 
@@ -62,10 +63,11 @@ def test_analyze_persists_and_api_retrieves_normalized_analysis() -> None:
             database_url="sqlite://", allowed_origins=("http://testserver",)
         ),
         analysis_orchestrator=orchestrator,
+        identity_verifier=FakeIdentityVerifier(),
         database_engine=engine,
     )
 
-    with TestClient(app) as client:
+    with TestClient(app, headers=AUTH_HEADERS) as client:
         response = client.post(
             "/api/v1/cases/analyze",
             files={
@@ -98,10 +100,11 @@ def test_default_api_dependency_composes_pipeline_without_provider_keys(
     engine = create_database_engine("sqlite://")
     app = create_app(
         settings=Settings(database_url="sqlite://"),
+        identity_verifier=FakeIdentityVerifier(),
         database_engine=engine,
     )
 
-    with TestClient(app) as client:
+    with TestClient(app, headers=AUTH_HEADERS) as client:
         response = client.post(
             "/api/v1/cases/analyze",
             files={
