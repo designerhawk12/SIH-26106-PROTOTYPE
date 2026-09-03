@@ -2,7 +2,12 @@
 
 from .models import Case
 from .repositories import CaseRepository, SqlAlchemyCaseRepository
-from .session import create_database_engine, create_session_factory, initialize_database
+from .session import (
+    create_database_engine,
+    create_session_factory,
+    initialize_database,
+    normalize_database_url,
+)
 
 __all__ = [
     "Case",
@@ -11,5 +16,6 @@ __all__ = [
     "create_database_engine",
     "create_session_factory",
     "initialize_database",
+    "normalize_database_url",
 ]
 

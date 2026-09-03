@@ -53,4 +53,33 @@ The v1 contract defines synchronous analysis creation, case listing/retrieval, P
 - `GET /api/v1/cases/{case_id}/report`
 - `GET /api/v1/health`
 
-See `docs/contracts/openapi.yaml` for request/response details. Implementation, dependency selection, migrations, and local run commands are intentionally deferred.
+See `docs/contracts/openapi.yaml` for request/response details.
+
+## Docker Compose
+
+The existing FastAPI application and TanStack/Vite frontend can run together without adding another database:
+
+```bash
+docker compose build
+docker compose up
+```
+
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8000`
+- Backend health: `http://localhost:8000/api/v1/health`
+
+Compose uses the existing SQLite configuration with a single named volume by default. Copy `.env.example` to an untracked `.env` only when overrides are needed; set `DOCKER_DATABASE_URL` there to use the application's existing PostgreSQL/Supabase configuration. Provider credentials remain optional environment variables and are never passed to image builds. For a browser running on another host, set the public, non-secret `VITE_API_BASE_URL` before building the frontend image.
+
+## PostgreSQL / Supabase persistence
+
+The backend is the only component that connects to the database. Set `DATABASE_URL` to the Supabase PostgreSQL connection string for direct or Compose-backed runs. `DOCKER_DATABASE_URL` is an optional Compose-only override, primarily for selecting the named-volume SQLite path without changing local host configuration. Standard `postgresql://` and `postgres://` URLs are normalized to the Psycopg 3 SQLAlchemy driver. Keep the database password in the deployment environment or secret manager; never expose it through `VITE_*` variables.
+
+Apply migrations before starting a PostgreSQL deployment:
+
+```bash
+python -m alembic -c backend/alembic.ini upgrade head
+```
+
+The API does not create PostgreSQL tables at startup. Local and automated-test SQLite databases retain the existing non-destructive `create_all` behavior. For an existing database that already has the `cases` table but has never been managed by Alembic, verify that its columns and indexes match the initial migration, back it up, and then run `python -m alembic -c backend/alembic.ini stamp 0001_create_cases` once instead of replaying the initial migration.
+
+The current persistence model deliberately stores the complete `EmailAnalysis` aggregate in `cases.analysis_json` alongside searchable case summary columns. Parsed email evidence, timeline events, report inputs, and evidence-export inputs therefore persist atomically with the case. PDF reports and evidence ZIP files remain generated on demand; there are no existing report, export, or analyst metadata entities requiring separate tables.

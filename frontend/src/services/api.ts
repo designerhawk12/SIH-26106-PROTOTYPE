@@ -17,11 +17,11 @@ import type {
   ReputationVerdict,
 } from "@/types/analysis";
 
-export const API_BASE_URL: string = (import.meta.env["VITE_API_BASE_URL"] ?? "").replace(
-  /\/+$/,
-  "",
-);
-export const USE_MOCK = import.meta.env["VITE_USE_MOCK_API"] === "true";
+export const API_BASE_URL: string = (
+  import.meta.env.VITE_API_BASE_URL ?? ""
+).replace(/\/+$/, "");
+
+export const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === "true";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
