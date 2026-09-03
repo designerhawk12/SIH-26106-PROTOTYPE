@@ -83,3 +83,26 @@ python -m alembic -c backend/alembic.ini upgrade head
 The API does not create PostgreSQL tables at startup. Local and automated-test SQLite databases retain the existing non-destructive `create_all` behavior. For an existing database that already has the `cases` table but has never been managed by Alembic, verify that its columns and indexes match the initial migration, back it up, and then run `python -m alembic -c backend/alembic.ini stamp 0001_create_cases` once instead of replaying the initial migration.
 
 The current persistence model deliberately stores the complete `EmailAnalysis` aggregate in `cases.analysis_json` alongside searchable case summary columns. Parsed email evidence, timeline events, report inputs, and evidence-export inputs therefore persist atomically with the case. PDF reports and evidence ZIP files remain generated on demand; there are no existing report, export, or analyst metadata entities requiring separate tables.
+
+## Authentication and authorization
+
+Supabase Auth owns account credentials and session issuance. The browser uses only
+`VITE_SUPABASE_URL` and a `VITE_SUPABASE_PUBLISHABLE_KEY`, then sends the Supabase
+access token to FastAPI as a bearer token. FastAPI validates that token with Supabase
+Auth and loads the application role from `user_profiles`; the frontend never connects
+directly to PostgreSQL and user-editable authentication metadata cannot grant roles.
+
+Configure the same Supabase project on the backend with `SUPABASE_URL` and
+`SUPABASE_PUBLISHABLE_KEY`. Never use a service-role key in either publishable-key
+variable. Apply the latest Alembic migration before starting PostgreSQL deployments:
+
+```bash
+python -m alembic -c backend/alembic.ini upgrade head
+```
+
+New authenticated profiles default to `ANALYST`. For the first administrator, create
+and confirm the account, sign in once so its profile is provisioned, then assign
+`ADMIN` directly in the protected database administration environment. Subsequent
+role changes can use the FastAPI admin endpoint. Existing cases remain intact and are
+available to authenticated users with the `INSPECT_CASES` permission; this prototype
+does not retroactively infer ownership for legacy cases.

@@ -27,7 +27,9 @@ def test_initial_migration_upgrades_fresh_sqlite_database(
     engine = create_engine(f"sqlite:///{database_path.as_posix()}")
     try:
         inspector = inspect(engine)
-        assert {"alembic_version", "cases"}.issubset(inspector.get_table_names())
+        assert {"alembic_version", "cases", "user_profiles"}.issubset(
+            inspector.get_table_names()
+        )
         assert {column["name"] for column in inspector.get_columns("cases")} == {
             "id",
             "created_at",
@@ -44,6 +46,15 @@ def test_initial_migration_upgrades_fresh_sqlite_database(
             "ix_cases_email_sha256",
             "ix_cases_status",
         }
+        assert {column["name"] for column in inspector.get_columns("user_profiles")} == {
+            "user_id",
+            "display_name",
+            "email",
+            "organization",
+            "role",
+            "created_at",
+            "updated_at",
+        }
     finally:
         engine.dispose()
 
@@ -57,5 +68,6 @@ def test_postgresql_migration_can_render_offline(monkeypatch) -> None:
     command.upgrade(_config(output_buffer=output), "head", sql=True)
     sql = output.getvalue()
     assert "CREATE TABLE cases" in sql
+    assert "CREATE TABLE user_profiles" in sql
     assert "UUID" in sql
     assert "JSON" in sql

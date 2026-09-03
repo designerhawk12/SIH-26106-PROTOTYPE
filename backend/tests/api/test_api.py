@@ -26,6 +26,7 @@ from backend.app.schemas import (
 )
 from backend.app.services.orchestrator import AnalysisPipelineOrchestrator
 from backend.main import create_app
+from backend.tests.auth_helpers import AUTH_HEADERS, FakeIdentityVerifier
 
 
 class MockEmailForensicsService:
@@ -122,13 +123,14 @@ def build_test_app(*, max_upload_bytes: int = 1024, threat_failure: bool = False
         settings=settings,
         analysis_orchestrator=pipeline,
         reporting_service=MockReportingService(),
+        identity_verifier=FakeIdentityVerifier(),
         database_engine=create_database_engine("sqlite://"),
     )
 
 
 @pytest.fixture
 def client() -> TestClient:
-    with TestClient(build_test_app()) as test_client:
+    with TestClient(build_test_app(), headers=AUTH_HEADERS) as test_client:
         yield test_client
 
 
@@ -168,7 +170,7 @@ def test_analyze_list_get_and_report(client: TestClient) -> None:
 
 
 def test_provider_failure_returns_and_persists_partial_analysis() -> None:
-    with TestClient(build_test_app(threat_failure=True)) as client:
+    with TestClient(build_test_app(threat_failure=True), headers=AUTH_HEADERS) as client:
         response = client.post(
             "/api/v1/cases/analyze",
             files={"file": ("message.eml", b"From: sender@example.test\n\nHello")},
@@ -207,7 +209,7 @@ def test_upload_validation(
 
 
 def test_upload_size_limit() -> None:
-    with TestClient(build_test_app(max_upload_bytes=3)) as client:
+    with TestClient(build_test_app(max_upload_bytes=3), headers=AUTH_HEADERS) as client:
         response = client.post(
             "/api/v1/cases/analyze",
             files={"file": ("message.eml", b"1234")},

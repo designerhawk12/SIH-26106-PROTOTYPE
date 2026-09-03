@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyzeRouteImport } from './routes/analyze'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SystemStatusRouteImport } from './routes/system-status'
@@ -32,6 +33,11 @@ const AnalyzeRoute = AnalyzeRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/system-status': typeof SystemStatusRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/system-status': typeof SystemStatusRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/system-status': typeof SystemStatusRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyze'
     | '/dashboard'
+    | '/login'
     | '/reports'
     | '/settings'
     | '/system-status'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyze'
     | '/dashboard'
+    | '/login'
     | '/reports'
     | '/settings'
     | '/system-status'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyze'
     | '/dashboard'
+    | '/login'
     | '/reports'
     | '/settings'
     | '/system-status'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyzeRoute: typeof AnalyzeRoute
   DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   SystemStatusRoute: typeof SystemStatusRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyzeRoute: AnalyzeRoute,
   DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   SystemStatusRoute: SystemStatusRoute,

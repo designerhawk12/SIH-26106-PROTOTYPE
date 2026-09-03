@@ -41,6 +41,7 @@ from backend.app.schemas import (
 from backend.app.services.export import build_export_service
 from backend.app.services.reporting import build_reporting_service
 from backend.main import create_app
+from backend.tests.auth_helpers import AUTH_HEADERS, FakeIdentityVerifier
 
 
 def _partial_analysis() -> EmailAnalysis:
@@ -161,6 +162,7 @@ def test_database_failure_returns_structured_503() -> None:
     engine = create_database_engine("sqlite://")
     app = create_app(
         settings=Settings(database_url="sqlite://"),
+        identity_verifier=FakeIdentityVerifier(),
         database_engine=engine,
     )
 
@@ -168,7 +170,7 @@ def test_database_failure_returns_structured_503() -> None:
         yield FailingRepository()
 
     app.dependency_overrides[get_case_repository] = override_repository
-    with TestClient(app) as client:
+    with TestClient(app, headers=AUTH_HEADERS) as client:
         response = client.get("/api/v1/cases")
 
     assert response.status_code == 503

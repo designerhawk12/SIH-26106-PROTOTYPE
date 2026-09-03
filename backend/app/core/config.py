@@ -18,6 +18,9 @@ class Settings(BaseModel):
     app_log_level: str = "INFO"
     demo_mode: bool = False
     database_url: str = "sqlite:///./email_threat_platform.db"
+    supabase_url: str | None = None
+    supabase_publishable_key: str | None = Field(default=None, repr=False)
+    auth_timeout_seconds: float = Field(default=5.0, gt=0, le=30)
     max_upload_bytes: int = Field(default=26_214_400, gt=0)
 
     allowed_origins: tuple[str, ...] = (
@@ -56,6 +59,9 @@ class Settings(BaseModel):
             database_url=os.getenv(
                 "DATABASE_URL", "sqlite:///./email_threat_platform.db"
             ),
+            supabase_url=os.getenv("SUPABASE_URL") or None,
+            supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY") or None,
+            auth_timeout_seconds=float(os.getenv("AUTH_TIMEOUT_SECONDS", "5")),
             max_upload_bytes=int(os.getenv("MAX_UPLOAD_BYTES", "26214400")),
             allowed_origins=origins,
         )
