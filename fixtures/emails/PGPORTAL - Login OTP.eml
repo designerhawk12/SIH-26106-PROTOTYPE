@@ -1,0 +1,69 @@
+Delivered-To: designerhawk12@gmail.com
+Received: by 2002:a05:6000:60d:b0:482:c3fd:17d6 with SMTP id bn13csp2917105wrb;
+        Mon, 24 Aug 2026 09:43:34 -0700 (PDT)
+X-Received: by 2002:a05:6a00:4387:b0:845:e8b9:347 with SMTP id d2e1a72fcca58-8520ba55ce3mr36997807b3a.13.1787589814123;
+        Mon, 24 Aug 2026 09:43:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787589814; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Zbp0fcoUZ3SL5jati+/R9pPAoUDGY3zh+igOtVRTANXBi6k47eNooUjlcz7J9nM2CK
+         ByoTx2x3GP4P6acidtF8j00b9hqBDoUlekykcnUDzNSKCSW1RE6P43CGoRyIECtVLuBC
+         cEni+893xZDZWeVEwPL1B9xuHlH63F4m6Ih9X7BaHAX+lpp52k7+q6p6yh8WpN5k4TxX
+         o1fVsV7aT4Naf/fTXr7aeAu0jJQ1f+0hAcS7Ngcg5qN593+u9tUMVZtQjtLYyFXfGCfB
+         qoHAynZNz3GsLqhdB1lcpRstPLU4LFEcWbQ6uUbXp1FAEvj3u+19qmIWShacUxSyycOc
+         DdpA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:subject:date:to:from:mime-version
+         :dkim-signature:message-id;
+        bh=9N+6GBlkuVp7IwriU0y/BLSMf1YRbXOTSk7Y3SThVL8=;
+        fh=FPY5kd7TG4z4UEW6EOcBdwHrXmNgv1d/sqTV2Yz7WUE=;
+        b=pggoVRQBNG0N/+7p6mOreMS5hS39i4+4liott5Wtgoe+630GAa6WXF7GaNkhCVn/jY
+         e0SYZtdL0cpGWic+ISSrHQcBxQwwc7fygpvVCJT/XzBz/3tcDyFnTcSvMIAKAMVtpRo2
+         5fstZmSwmKcI6iJxND2JVqi0+Dza3DST8PryWxb6Lgft3xMq8qo+BYeYYkfStdda3s5f
+         r6YmnvwKQt5lOPEZYw8R56SvMT5v6BQrU75OcV0FRRKjvSacjEbl/xZ/sc6njEgVv/OU
+         cj/o2mzdu8CrGs/7L6OFT9qRkj7egQIbfNzyxnr68rtMP192I1L3CoUqeTCX3J4IngCO
+         U8Jw==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@nic.in header.s=BBSRNICIN header.b=QG0o0P9o;
+       spf=pass (google.com: domain of cpgrams-darpg@nic.in designates 164.100.172.51 as permitted sender) smtp.mailfrom=cpgrams-darpg@nic.in;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=nic.in
+Return-Path: <cpgrams-darpg@nic.in>
+Received: from vastu172052.nic.in (vastu172051.nic.in. [164.100.172.51])
+        by mx.google.com with ESMTPS id d2e1a72fcca58-8521099e3a3si10690253b3a.176.2026.08.24.09.43.33
+        for <designerhawk12@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 24 Aug 2026 09:43:34 -0700 (PDT)
+Received-SPF: pass (google.com: domain of cpgrams-darpg@nic.in designates 164.100.172.51 as permitted sender) client-ip=164.100.172.51;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@nic.in header.s=BBSRNICIN header.b=QG0o0P9o;
+       spf=pass (google.com: domain of cpgrams-darpg@nic.in designates 164.100.172.51 as permitted sender) smtp.mailfrom=cpgrams-darpg@nic.in;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=nic.in
+Message-ID: <6a8c74b6.e342814d.257d9f.914fSMTPIN_ADDED_MISSING@mx.google.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=nic.in; s=BBSRNICIN;
+	t=1787589781; bh=9N+6GBlkuVp7IwriU0y/BLSMf1YRbXOTSk7Y3SThVL8=;
+	h=From:To:Date:Subject;
+	b=QG0o0P9ohQml3H63IxAG+F1F7feiDtcKCcGuF5micVTgLoDBeF+oyKehjrvXo5cyt
+	 jECFfcZzprg+SGDIpKYx8zs5jHJ9Vti5LRcP0yFUhvr3DZ/OFrjNiKiqt52K3dzwfp
+	 Y1j4F1syWG8bpQPNIbt3w/6LCKyaMUt/PpkKC1475M5bnyQ4wppKUp0BbLBLekPvI8
+	 osIbq47P74lkc7eVuzlLY9ETACaDcLwqqXDZrw9MF13qwFnlIocaFYD4m5RABQMGaq
+	 JFzss32FNoCKje7Kl6PlKTpDxGlcS379z+/Q/nzpgaNN098OZkysCQO5oVhcBnDDTT
+	 5GHUN0golX4kQ==
+Received: from PR04CPGP-Web1 (unknown [192.168.255.11])
+	by vastu172052.nic.in (Postfix) with ESMTPSA id ADE8FC014906
+	for <designerhawk12@gmail.com>; Mon, 24 Aug 2026 22:13:01 +0530 (IST)
+MIME-Version: 1.0
+From: "PGPORTAL" <cpgrams-darpg@nic.in>
+To: designerhawk12@gmail.com
+Date: 24 Aug 2026 22:13:01 +0530
+Subject: PGPORTAL - Login OTP
+Content-Type: text/html; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+
+<b> Dear Sir/Madam, </b><br/><P style=3D'padding: 5px 0px 5px 0px=
+;'>OTP to Login in PG Portal is 26465636. Valid for 10 minutes.</=
+P><P style=3D'margin-left: 5px; font-size: 12px; font-family: Ari=
+al, Helvetica, sans-serif; color: #666666; padding-top: 2px; padd=
+ing-bottom: 20px; border-top-style: solid; border-top-width: 1px;=
+ border-top-color: #666666;'>Note: This is a system generated mai=
+l. Please do not reply to it.</P>
+

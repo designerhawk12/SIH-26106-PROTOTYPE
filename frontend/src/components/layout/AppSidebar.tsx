@@ -7,6 +7,7 @@ import {
   FileText,
   FolderSearch,
   LayoutDashboard,
+  MapPinned,
   Radar,
   ScanLine,
   Settings,
@@ -21,6 +22,7 @@ const primaryNav = [
   { label: "Analyze Email", to: "/analyze", icon: ScanLine },
   { label: "Investigations", to: "/cases", icon: FolderSearch },
   { label: "Threat Intelligence", to: "/threat-intelligence", icon: Radar },
+  { label: "Geolocator", to: "/geolocator", icon: MapPinned },
   { label: "Reports", to: "/reports", icon: FileText },
 ] as const;
 
@@ -43,6 +45,8 @@ export function AppSidebar() {
       <Link
         key={item.to}
         to={item.to}
+        aria-label={item.label}
+        aria-current={active ? "page" : undefined}
         className={cn(
           "group relative flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition-colors duration-200",
           active

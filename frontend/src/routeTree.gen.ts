@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyzeRouteImport } from './routes/analyze'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as GeolocatorRouteImport } from './routes/geolocator'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -33,6 +34,11 @@ const AnalyzeRoute = AnalyzeRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GeolocatorRoute = GeolocatorRouteImport.update({
+  id: '/geolocator',
+  path: '/geolocator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
   '/dashboard': typeof DashboardRoute
+  '/geolocator': typeof GeolocatorRoute
   '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
   '/dashboard': typeof DashboardRoute
+  '/geolocator': typeof GeolocatorRoute
   '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analyze': typeof AnalyzeRoute
   '/dashboard': typeof DashboardRoute
+  '/geolocator': typeof GeolocatorRoute
   '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyze'
     | '/dashboard'
+    | '/geolocator'
     | '/login'
     | '/reports'
     | '/settings'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyze'
     | '/dashboard'
+    | '/geolocator'
     | '/login'
     | '/reports'
     | '/settings'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyze'
     | '/dashboard'
+    | '/geolocator'
     | '/login'
     | '/reports'
     | '/settings'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyzeRoute: typeof AnalyzeRoute
   DashboardRoute: typeof DashboardRoute
+  GeolocatorRoute: typeof GeolocatorRoute
   LoginRoute: typeof LoginRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/geolocator': {
+      id: '/geolocator'
+      path: '/geolocator'
+      fullPath: '/geolocator'
+      preLoaderRoute: typeof GeolocatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyzeRoute: AnalyzeRoute,
   DashboardRoute: DashboardRoute,
+  GeolocatorRoute: GeolocatorRoute,
   LoginRoute: LoginRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,

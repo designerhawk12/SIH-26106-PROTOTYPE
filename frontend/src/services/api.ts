@@ -2,6 +2,7 @@
 import { sampleAnalysis, sampleCases, sampleStats } from "@/mocks/sampleAnalysis";
 import { supabase } from "@/integrations/supabase/client";
 import type { UserProfile } from "@/types/auth";
+import type { InfrastructureWorkspace } from "@/types/infrastructure";
 import type {
   AnalysisViewModel,
   AnalyzeCaseResponse,
@@ -17,6 +18,7 @@ import type {
   MimeNode,
   Reputation,
   ReputationVerdict,
+  ThreatIntelligenceWorkspace,
 } from "@/types/analysis";
 
 export const API_BASE_URL: string = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
@@ -317,6 +319,14 @@ export async function listCases(): Promise<CaseSummary[]> {
     return sampleCases;
   }
   return (await requestJson<CaseListResponse>("/api/v1/cases")).items;
+}
+
+export async function getInfrastructure(): Promise<InfrastructureWorkspace> {
+  return requestJson<InfrastructureWorkspace>("/api/v1/infrastructure");
+}
+
+export async function getThreatIntelligenceWorkspace(): Promise<ThreatIntelligenceWorkspace> {
+  return requestJson<ThreatIntelligenceWorkspace>("/api/v1/threat-intelligence");
 }
 
 export async function getCase(caseId: string): Promise<AnalysisViewModel> {

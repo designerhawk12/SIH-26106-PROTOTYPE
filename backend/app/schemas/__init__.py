@@ -43,6 +43,15 @@ from .enums import (
 )
 from .risk import RiskReason, RiskResult
 from .threat_intel import GeoLocationResult, ThreatFinding, ThreatIntelResult
+from .threat_workspace import (
+    IntelligenceStatus,
+    ProviderStatusRecord,
+    ProviderWorkspaceStatus,
+    ThreatCaseReference,
+    ThreatIntelligenceWorkspace,
+    ThreatIOCRecord,
+    ThreatSummary,
+)
 
 __all__ = [
     "AnalysisStatus",
@@ -66,10 +75,13 @@ __all__ = [
     "HealthResponse",
     "IOCSource",
     "IOCType",
+    "IntelligenceStatus",
     "MailboxAddress",
     "MimePart",
     "ParsedEmail",
     "Permission",
+    "ProviderStatusRecord",
+    "ProviderWorkspaceStatus",
     "ReceivedHop",
     "ReputationVerdict",
     "RiskLevel",
@@ -77,7 +89,11 @@ __all__ = [
     "RiskResult",
     "Severity",
     "ThreatFinding",
+    "ThreatCaseReference",
+    "ThreatIntelligenceWorkspace",
+    "ThreatIOCRecord",
     "ThreatIntelResult",
+    "ThreatSummary",
     "TimelineEvent",
     "TimelineEventType",
     "UpdateProfileRequest",

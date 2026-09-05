@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
-import { PlaceholderPage } from "@/pages/PlaceholderPage";
+import { ThreatIntelligencePage } from "@/pages/ThreatIntelligencePage";
 
 const title = "Threat Intelligence — Sentinel MX";
 const description =
@@ -17,10 +17,7 @@ export const Route = createFileRoute("/threat-intelligence")({
   }),
   component: () => (
     <AppShell>
-      <PlaceholderPage
-        title="Threat Intelligence"
-        description="Enrichment feeds for observed indicators will surface here once the intelligence service is connected."
-      />
+      <ThreatIntelligencePage />
     </AppShell>
   ),
 });
