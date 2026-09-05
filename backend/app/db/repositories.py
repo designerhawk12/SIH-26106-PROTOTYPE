@@ -27,6 +27,8 @@ class CaseRepository(Protocol):
 
     def count(self) -> int: ...
 
+    def list_analyses(self) -> tuple[EmailAnalysis, ...]: ...
+
 
 class SqlAlchemyCaseRepository:
     def __init__(self, session: Session) -> None:
@@ -76,6 +78,13 @@ class SqlAlchemyCaseRepository:
 
     def count(self) -> int:
         return int(self._session.scalar(select(func.count()).select_from(Case)) or 0)
+
+    def list_analyses(self) -> tuple[EmailAnalysis, ...]:
+        statement = select(Case.analysis_json).order_by(Case.created_at.desc())
+        return tuple(
+            EmailAnalysis.model_validate_json(json.dumps(payload))
+            for payload in self._session.scalars(statement)
+        )
 
 
 class UserProfileRepository(Protocol):

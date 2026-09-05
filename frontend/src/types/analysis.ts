@@ -226,6 +226,46 @@ export interface ErrorResponse {
   request_id: string | null;
 }
 
+export type IntelligenceStatus = "MALICIOUS" | "SUSPICIOUS" | "BENIGN" | "UNKNOWN" | "UNAVAILABLE";
+export type ProviderWorkspaceStatus = "AVAILABLE" | "PARTIAL" | "UNAVAILABLE" | "UNKNOWN";
+export interface ThreatCaseReference {
+  case_id: string;
+  subject: string | null;
+  original_filename: string | null;
+}
+export interface ThreatIOCRecord {
+  ioc_type: IOCType;
+  value: string;
+  status: IntelligenceStatus;
+  providers: string[];
+  confidence: number | null;
+  categories: string[];
+  details: string[];
+  filename: string | null;
+  associated_cases: ThreatCaseReference[];
+  demo: boolean;
+}
+export interface ThreatSummary {
+  total_observed_iocs: number;
+  suspicious_or_malicious: number;
+  benign: number;
+  unknown: number;
+  unavailable: number;
+}
+export interface ProviderStatusRecord {
+  name: string;
+  category: "THREAT_INTELLIGENCE" | "GEOLOCATION";
+  status: ProviderWorkspaceStatus;
+  demo: boolean;
+  messages: string[];
+}
+export interface ThreatIntelligenceWorkspace {
+  summary: ThreatSummary;
+  indicators: ThreatIOCRecord[];
+  providers: ProviderStatusRecord[];
+  cases_scanned: number;
+}
+
 /* Presentation-only types below are derived centrally in services/api.ts. */
 export type AuthResult = "PASS" | "FAIL" | "UNKNOWN";
 export type Reputation = "malicious" | "suspicious" | "neutral" | "clean" | "unknown";
