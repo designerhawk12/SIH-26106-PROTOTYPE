@@ -1,6 +1,13 @@
 """Authoritative public exports for shared contracts."""
 
 from .analysis import EmailAnalysis, TimelineEvent
+from .ai_investigator import (
+    AIAskRequest,
+    AIInvestigationAction,
+    AIInvestigationRequest,
+    AIInvestigatorResponse,
+    AIInvestigatorStatus,
+)
 from .auth import (
     Permission,
     UpdateProfileRequest,
@@ -54,6 +61,11 @@ from .threat_workspace import (
 )
 
 __all__ = [
+    "AIAskRequest",
+    "AIInvestigationAction",
+    "AIInvestigationRequest",
+    "AIInvestigatorResponse",
+    "AIInvestigatorStatus",
     "AnalysisStatus",
     "AnalyzeCaseResponse",
     "AttachmentEvidence",

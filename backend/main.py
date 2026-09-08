@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from starlette.concurrency import run_in_threadpool
 
 from .app.api import (
+    ai_investigator_router,
     auth_router,
     cases_router,
     health_router,
@@ -22,6 +23,7 @@ from .app.core import Settings, get_settings, install_exception_handlers
 from .app.core.middleware import RequestIdMiddleware
 from .app.db import create_database_engine, create_session_factory, initialize_database
 from .app.services.auth.interfaces import IdentityVerifier
+from .app.services.ai_investigator.interfaces import AIInvestigatorService
 from .app.services.orchestrator.interfaces import AnalysisOrchestrator
 from .app.services.reporting.interfaces import ReportingService
 
@@ -32,6 +34,7 @@ def create_app(
     analysis_orchestrator: AnalysisOrchestrator | None = None,
     reporting_service: ReportingService | None = None,
     identity_verifier: IdentityVerifier | None = None,
+    ai_investigator_service: AIInvestigatorService | None = None,
     database_engine: Engine | None = None,
     session_factory: sessionmaker[Session] | None = None,
 ) -> FastAPI:
@@ -54,6 +57,7 @@ def create_app(
     application.state.analysis_orchestrator = analysis_orchestrator
     application.state.reporting_service = reporting_service
     application.state.identity_verifier = identity_verifier
+    application.state.ai_investigator_service = ai_investigator_service
     application.state.database_engine = engine
     application.state.session_factory = factory
 
@@ -68,6 +72,7 @@ def create_app(
     install_exception_handlers(application)
     application.include_router(health_router)
     application.include_router(auth_router)
+    application.include_router(ai_investigator_router)
     application.include_router(cases_router)
     application.include_router(threat_intelligence_router)
     application.include_router(infrastructure_router)
