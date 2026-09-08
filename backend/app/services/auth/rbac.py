@@ -9,6 +9,7 @@ ANALYST_PERMISSIONS = frozenset(
         Permission.GENERATE_REPORTS,
         Permission.EXPORT_EVIDENCE,
         Permission.CREATE_ANALYST_NOTES,
+        Permission.MANAGE_IOC_WATCHLIST,
     }
 )
 

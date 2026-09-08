@@ -13,7 +13,7 @@ from starlette.concurrency import run_in_threadpool
 
 from ...core import AppError, Settings
 from ...core.uploads import read_bounded_upload, safe_eml_filename
-from ...db import CaseRepository
+from ...db import CaseRepository, WorkflowRepository
 from ...schemas import (
     AnalysisStatus,
     AnalyzeCaseResponse,
@@ -23,6 +23,7 @@ from ...schemas import (
     Permission,
     RiskLevel,
     UserProfile,
+    AuditAction,
 )
 from ...services.export.interfaces import EvidenceExportService
 from ...services.orchestrator import EmailAnalysisError
@@ -34,6 +35,7 @@ from ..dependencies import (
     get_export_service,
     get_reporting_service,
     get_runtime_settings,
+    get_workflow_repository,
     require_permission,
 )
 
@@ -84,9 +86,10 @@ async def analyze_case(
     settings: Annotated[Settings, Depends(get_runtime_settings)],
     orchestrator: Annotated[AnalysisOrchestrator, Depends(get_analysis_orchestrator)],
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
-    _user: Annotated[
+    user: Annotated[
         UserProfile, Depends(require_permission(Permission.ANALYZE_EMAILS))
     ],
+    workflow: Annotated[WorkflowRepository, Depends(get_workflow_repository)],
 ) -> AnalyzeCaseResponse:
     filename = safe_eml_filename(file.filename)
     raw_email = await read_bounded_upload(file, settings.max_upload_bytes)
@@ -100,6 +103,14 @@ async def analyze_case(
             field="file",
         ) from exc
     await _run_database_operation(repository.create, analysis)
+    await _run_database_operation(
+        workflow.record_audit,
+        actor_user_id=user.user_id,
+        action=AuditAction.CASE_ANALYZED,
+        resource_type="CASE",
+        resource_id=str(analysis.case_id),
+        metadata={"status": analysis.status.value},
+    )
     return AnalyzeCaseResponse(analysis=analysis)
 
 
@@ -153,9 +164,10 @@ async def get_case_report(
     case_id: UUID,
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
     reporting: Annotated[ReportingService, Depends(get_reporting_service)],
-    _user: Annotated[
+    user: Annotated[
         UserProfile, Depends(require_permission(Permission.GENERATE_REPORTS))
     ],
+    workflow: Annotated[WorkflowRepository, Depends(get_workflow_repository)],
 ) -> Response:
     analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
@@ -170,14 +182,22 @@ async def get_case_report(
             code="REPORT_NOT_READY",
             message="The case is not ready for reporting.",
         )
+    notes = await _run_database_operation(workflow.list_notes, case_id)
     try:
-        report_bytes = await reporting.render_pdf(analysis)
+        report_bytes = await reporting.render_pdf(analysis, analyst_notes=notes)
     except Exception as exc:
         raise AppError(
             status_code=503,
             code="REPORT_GENERATION_FAILED",
             message="The forensic report is temporarily unavailable.",
         ) from exc
+    await _run_database_operation(
+        workflow.record_audit,
+        actor_user_id=user.user_id,
+        action=AuditAction.REPORT_GENERATED,
+        resource_type="CASE",
+        resource_id=str(case_id),
+    )
     return Response(
         content=report_bytes,
         media_type="application/pdf",
@@ -192,9 +212,10 @@ async def get_case_evidence(
     case_id: UUID,
     repository: Annotated[CaseRepository, Depends(get_case_repository)],
     export_svc: Annotated[EvidenceExportService, Depends(get_export_service)],
-    _user: Annotated[
+    user: Annotated[
         UserProfile, Depends(require_permission(Permission.EXPORT_EVIDENCE))
     ],
+    workflow: Annotated[WorkflowRepository, Depends(get_workflow_repository)],
 ) -> Response:
     analysis = await _run_database_operation(repository.get_analysis, case_id)
     if analysis is None:
@@ -217,6 +238,13 @@ async def get_case_evidence(
             code="EVIDENCE_EXPORT_FAILED",
             message="The forensic evidence export is temporarily unavailable.",
         ) from exc
+    await _run_database_operation(
+        workflow.record_audit,
+        actor_user_id=user.user_id,
+        action=AuditAction.EVIDENCE_EXPORTED,
+        resource_type="CASE",
+        resource_id=str(case_id),
+    )
     return Response(
         content=zip_bytes,
         media_type="application/zip",

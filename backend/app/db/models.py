@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, DateTime, Integer, String, Uuid
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, Uuid, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -53,5 +53,64 @@ class UserProfileRecord(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+
+
+class AnalystNoteRecord(Base):
+    """Human-authored case note; it is never part of the normalized email evidence."""
+
+    __tablename__ = "analyst_notes"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    case_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("cases.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    author_user_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("user_profiles.user_id"), nullable=False, index=True
+    )
+    author_display_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+
+
+class AuditEventRecord(Base):
+    """Sanitized activity record, intentionally distinct from forensic timeline events."""
+
+    __tablename__ = "audit_events"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    actor_user_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True, index=True)
+    action: Mapped[str] = mapped_column(String(48), nullable=False, index=True)
+    resource_type: Mapped[str] = mapped_column(String(48), nullable=False, index=True)
+    resource_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, index=True
+    )
+    metadata_json: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+
+
+class IOCWatchlistRecord(Base):
+    """A deduplicated subscription to an IOC already observed by Sentinel MX."""
+
+    __tablename__ = "ioc_watchlist"
+    __table_args__ = (
+        UniqueConstraint("ioc_type", "normalized_value", name="uq_ioc_watchlist_type_value"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    ioc_type: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    normalized_value: Mapped[str] = mapped_column(String(2_048), nullable=False)
+    created_by_user_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("user_profiles.user_id"), nullable=False, index=True
+    )
+    created_by_display_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, index=True
     )
 
