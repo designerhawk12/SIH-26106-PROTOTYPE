@@ -17,6 +17,7 @@ from .app.api import (
     cases_router,
     health_router,
     infrastructure_router,
+    system_router,
     threat_intelligence_router,
     watchlist_router,
     workflow_cases_router,
@@ -80,6 +81,7 @@ def create_app(
     application.include_router(watchlist_router)
     application.include_router(threat_intelligence_router)
     application.include_router(infrastructure_router)
+    application.include_router(system_router)
     return application
 
 

@@ -31,6 +31,31 @@ export const API_BASE_URL: string = (import.meta.env.VITE_API_BASE_URL ?? "").re
 
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === "true";
 
+export type SystemStatusState =
+  | "OPERATIONAL"
+  | "CONFIGURED"
+  | "NOT_CONFIGURED"
+  | "AVAILABLE"
+  | "ENABLED"
+  | "DISABLED"
+  | "SIMULATED";
+
+export interface SystemComponentStatus {
+  label: string;
+  state: SystemStatusState;
+  detail: string;
+}
+
+export interface SystemStatus {
+  backend: SystemComponentStatus;
+  database: SystemComponentStatus;
+  authentication: SystemComponentStatus;
+  demo_mode: SystemComponentStatus;
+  threat_intelligence: SystemComponentStatus[];
+  geolocation: SystemComponentStatus;
+  ai_investigator: SystemComponentStatus;
+}
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class ApiError extends Error {
@@ -96,6 +121,16 @@ async function request(path: string, init?: RequestInit, timeoutMs = 15_000): Pr
 
 export async function getCurrentUser(): Promise<UserProfile> {
   return requestJson<UserProfile>("/api/v1/auth/me");
+}
+
+export async function updateCurrentUser(
+  update: Pick<UserProfile, "display_name" | "organization">,
+): Promise<UserProfile> {
+  return requestJson<UserProfile>("/api/v1/auth/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(update),
+  });
 }
 
 async function requestJson<T>(path: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
@@ -357,6 +392,8 @@ export async function getRelatedCases(caseId: string): Promise<RelatedCasesRespo
     };
   }
   return requestJson<RelatedCasesResponse>(`/api/v1/cases/${caseId}/related`);
+}
+
 export async function getCaseNotes(caseId: string): Promise<AnalystNote[]> {
   return (await requestJson<{ items: AnalystNote[] }>(`/api/v1/cases/${caseId}/notes`)).items;
 }
@@ -474,6 +511,26 @@ export async function getHealth(): Promise<HealthResponse> {
     };
   }
   return requestJson<HealthResponse>("/api/v1/health", undefined, 5_000);
+}
+
+export async function getSystemStatus(): Promise<SystemStatus> {
+  if (USE_MOCK) {
+    const disabled = (label: string): SystemComponentStatus => ({
+      label,
+      state: "NOT_CONFIGURED",
+      detail: "Not configured for this mock frontend session.",
+    });
+    return {
+      backend: { label: "FastAPI Backend", state: "OPERATIONAL", detail: "Mock service active." },
+      database: { label: "SQLite Development Fallback", state: "OPERATIONAL", detail: "Local fallback selected." },
+      authentication: disabled("Supabase Auth"),
+      demo_mode: { label: "Demo Mode", state: "DISABLED", detail: "Synthetic enrichment is disabled." },
+      threat_intelligence: [disabled("AbuseIPDB"), disabled("VirusTotal")],
+      geolocation: { label: "Observed Infrastructure Geolocation", state: "AVAILABLE", detail: "Provider available." },
+      ai_investigator: disabled("AI Investigator (Groq)"),
+    };
+  }
+  return requestJson<SystemStatus>("/api/v1/system/status", undefined, 5_000);
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {

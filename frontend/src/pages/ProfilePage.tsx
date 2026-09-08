@@ -1,4 +1,5 @@
 import { ShieldCheck, UserRound } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/auth/AuthProvider";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -9,9 +10,41 @@ function formatRole(role: string | null) {
 }
 
 export function ProfilePage() {
-  const { user, profile, role, error, refreshProfile, hasPermission } = useAuth();
+  const { user, profile, role, error, refreshProfile, hasPermission, updateProfile } = useAuth();
   const displayName = profile?.display_name || user?.email || "Authenticated user";
   const email = profile?.email || user?.email || "Email unavailable";
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setName(profile?.display_name ?? "");
+    setOrganization(profile?.organization ?? "");
+  }, [profile?.display_name, profile?.organization]);
+
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setSaveError("Display name is required.");
+      return;
+    }
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await updateProfile({
+        display_name: trimmedName,
+        organization: organization.trim() || null,
+      });
+      setEditing(false);
+    } catch {
+      setSaveError("Profile changes could not be saved. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[900px]">
@@ -67,6 +100,70 @@ export function ProfilePage() {
             </div>
           </dl>
 
+          {profile && (
+            <div className="mt-7 border-t border-border pt-5">
+              {!editing ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold">Account details</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      You may update your display name and organization. Your role is administrator-managed.
+                    </p>
+                  </div>
+                  <ActionButton variant="secondary" onClick={() => setEditing(true)}>
+                    Edit profile
+                  </ActionButton>
+                </div>
+              ) : (
+                <form className="space-y-4" onSubmit={(event) => void saveProfile(event)}>
+                  <div>
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground" htmlFor="display-name">
+                      Display name
+                    </label>
+                    <input
+                      id="display-name"
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      maxLength={120}
+                      required
+                      className="mt-2 w-full rounded-sm border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground" htmlFor="organization">
+                      Organization / Team
+                    </label>
+                    <input
+                      id="organization"
+                      value={organization}
+                      onChange={(event) => setOrganization(event.target.value)}
+                      maxLength={160}
+                      className="mt-2 w-full rounded-sm border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-accent"
+                    />
+                  </div>
+                  {saveError && <p role="alert" className="text-xs text-danger">{saveError}</p>}
+                  <div className="flex flex-wrap gap-3">
+                    <ActionButton type="submit" disabled={saving}>
+                      {saving ? "Saving…" : "Save profile"}
+                    </ActionButton>
+                    <ActionButton
+                      variant="ghost"
+                      disabled={saving}
+                      onClick={() => {
+                        setName(profile.display_name);
+                        setOrganization(profile.organization ?? "");
+                        setSaveError(null);
+                        setEditing(false);
+                      }}
+                    >
+                      Cancel
+                    </ActionButton>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
           {!profile && (
             <div className="mt-6 border-t border-border pt-5">
               <p className="text-xs leading-relaxed text-warning">
@@ -102,9 +199,12 @@ export function ProfilePage() {
             {!profile && <li>Permission details unavailable.</li>}
           </ul>
           {hasPermission("MANAGE_USERS") && (
-            <p className="mt-5 border-t border-border pt-4 text-xs text-accent">
-              Administrator user-management access is enabled.
-            </p>
+            <div className="mt-5 border-t border-border pt-4 text-xs text-accent">
+              <p>Administrator user-management access is enabled.</p>
+              <p className="mt-1 text-muted-foreground">
+                Role assignments are enforced by the backend and cannot be changed from this profile.
+              </p>
+            </div>
           )}
         </Panel>
       </div>
