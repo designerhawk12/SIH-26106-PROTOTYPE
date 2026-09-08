@@ -101,7 +101,7 @@ class MockRiskService:
 
 
 class MockReportingService:
-    async def render_pdf(self, analysis: object) -> bytes:
+    async def render_pdf(self, analysis: object, **_kwargs: object) -> bytes:
         return b"%PDF-1.4\nmock report\n%%EOF"
 
 

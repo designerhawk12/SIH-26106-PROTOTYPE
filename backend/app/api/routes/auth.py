@@ -7,9 +7,10 @@ from fastapi import APIRouter, Depends
 from starlette.concurrency import run_in_threadpool
 
 from ...core import AppError
-from ...db import UserProfileRepository
+from ...db import UserProfileRepository, WorkflowRepository
 from ...schemas import (
     Permission,
+    AuditAction,
     UpdateProfileRequest,
     UpdateRoleRequest,
     UserListResponse,
@@ -18,6 +19,7 @@ from ...schemas import (
 from ..dependencies import (
     get_current_user,
     get_user_profile_repository,
+    get_workflow_repository,
     require_permission,
 )
 
@@ -78,12 +80,13 @@ async def list_users(
 async def update_user_role(
     user_id: UUID,
     update: UpdateRoleRequest,
-    _admin: Annotated[
+    admin: Annotated[
         UserProfile, Depends(require_permission(Permission.MANAGE_USERS))
     ],
     repository: Annotated[
         UserProfileRepository, Depends(get_user_profile_repository)
     ],
+    workflow: Annotated[WorkflowRepository, Depends(get_workflow_repository)],
 ) -> UserProfile:
     try:
         updated = await run_in_threadpool(repository.update_role, user_id, update.role)
@@ -95,4 +98,19 @@ async def update_user_role(
         ) from exc
     if updated is None:
         raise AppError(status_code=404, code="PROFILE_NOT_FOUND", message="Profile not found.")
+    try:
+        await run_in_threadpool(
+            workflow.record_audit,
+            actor_user_id=admin.user_id,
+            action=AuditAction.ROLE_CHANGED,
+            resource_type="USER_PROFILE",
+            resource_id=str(user_id),
+            metadata={"new_role": updated.role.value},
+        )
+    except Exception as exc:
+        raise AppError(
+            status_code=503,
+            code="DATABASE_UNAVAILABLE",
+            message="Audit persistence is temporarily unavailable.",
+        ) from exc
     return updated

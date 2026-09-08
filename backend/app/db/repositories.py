@@ -10,10 +10,29 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from ..schemas import EmailAnalysis, UpdateProfileRequest, UserProfile, UserRole
+from ..schemas import (
+    AnalystNote,
+    AuditAction,
+    AuditEvent,
+    CreateAnalystNoteRequest,
+    CreateWatchlistRequest,
+    EmailAnalysis,
+    IOCType,
+    UpdateAnalystNoteRequest,
+    UpdateProfileRequest,
+    UserProfile,
+    UserRole,
+    WatchlistEntry,
+)
 from ..services.auth.interfaces import AuthenticatedIdentity
 from ..services.auth.rbac import permissions_for_role
-from .models import Case, UserProfileRecord
+from .models import (
+    AnalystNoteRecord,
+    AuditEventRecord,
+    Case,
+    IOCWatchlistRecord,
+    UserProfileRecord,
+)
 
 
 class CaseRepository(Protocol):
@@ -195,6 +214,210 @@ class SqlAlchemyUserProfileRepository:
         row.role = role.value
         self._commit()
         return _profile_schema(row)
+
+    def _commit(self) -> None:
+        try:
+            self._session.commit()
+        except SQLAlchemyError:
+            self._session.rollback()
+            raise
+
+
+class WorkflowRepository(Protocol):
+    def list_notes(self, case_id: UUID) -> tuple[AnalystNote, ...]: ...
+
+    def create_note(
+        self, case_id: UUID, author: UserProfile, request: CreateAnalystNoteRequest
+    ) -> AnalystNote: ...
+
+    def update_note(
+        self, note_id: UUID, request: UpdateAnalystNoteRequest
+    ) -> AnalystNote | None: ...
+
+    def delete_note(self, note_id: UUID) -> AnalystNote | None: ...
+
+    def list_audit(self, case_id: UUID) -> tuple[AuditEvent, ...]: ...
+
+    def record_audit(
+        self,
+        *,
+        actor_user_id: UUID | None,
+        action: AuditAction,
+        resource_type: str,
+        resource_id: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> AuditEvent: ...
+
+    def list_watchlist(self) -> tuple[WatchlistEntry, ...]: ...
+
+    def get_watchlist(self, ioc_type: IOCType, value: str) -> WatchlistEntry | None: ...
+
+    def create_watchlist(
+        self, request: CreateWatchlistRequest, author: UserProfile, value: str
+    ) -> WatchlistEntry: ...
+
+    def delete_watchlist(self, watchlist_id: UUID) -> WatchlistEntry | None: ...
+
+
+_SENSITIVE_METADATA_MARKERS = frozenset(
+    {"authorization", "password", "secret", "token", "api_key", "database_url"}
+)
+
+
+def _safe_metadata(metadata: dict[str, Any] | None) -> dict[str, Any]:
+    """Persist compact intentional metadata only; request objects are never accepted here."""
+
+    safe: dict[str, Any] = {}
+    for key, value in (metadata or {}).items():
+        key_text = str(key)[:80]
+        if any(marker in key_text.casefold() for marker in _SENSITIVE_METADATA_MARKERS):
+            continue
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            safe[key_text] = value[:500] if isinstance(value, str) else value
+    return safe
+
+
+def _note_schema(row: AnalystNoteRecord) -> AnalystNote:
+    return AnalystNote(
+        note_id=row.id,
+        case_id=row.case_id,
+        author_user_id=row.author_user_id,
+        author_display_name=row.author_display_name,
+        content=row.content,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+def _audit_schema(row: AuditEventRecord) -> AuditEvent:
+    return AuditEvent(
+        event_id=row.id,
+        actor_user_id=row.actor_user_id,
+        action=AuditAction(row.action),
+        resource_type=row.resource_type,
+        resource_id=row.resource_id,
+        timestamp=row.timestamp,
+        metadata=_safe_metadata(row.metadata_json),
+    )
+
+
+def _watchlist_schema(row: IOCWatchlistRecord) -> WatchlistEntry:
+    return WatchlistEntry(
+        watchlist_id=row.id,
+        ioc_type=IOCType(row.ioc_type),
+        value=row.normalized_value,
+        created_by_user_id=row.created_by_user_id,
+        created_by_display_name=row.created_by_display_name,
+        reason=row.reason,
+        created_at=row.created_at,
+    )
+
+
+class SqlAlchemyWorkflowRepository:
+    def __init__(self, session: Session) -> None:
+        self._session = session
+
+    def list_notes(self, case_id: UUID) -> tuple[AnalystNote, ...]:
+        statement = select(AnalystNoteRecord).where(AnalystNoteRecord.case_id == case_id).order_by(AnalystNoteRecord.created_at.asc())
+        return tuple(_note_schema(row) for row in self._session.scalars(statement))
+
+    def create_note(
+        self, case_id: UUID, author: UserProfile, request: CreateAnalystNoteRequest
+    ) -> AnalystNote:
+        row = AnalystNoteRecord(
+            case_id=case_id,
+            author_user_id=author.user_id,
+            author_display_name=author.display_name,
+            content=request.content,
+        )
+        self._session.add(row)
+        self._commit()
+        self._session.refresh(row)
+        return _note_schema(row)
+
+    def update_note(
+        self, note_id: UUID, request: UpdateAnalystNoteRequest
+    ) -> AnalystNote | None:
+        row = self._session.get(AnalystNoteRecord, note_id)
+        if row is None:
+            return None
+        row.content = request.content
+        self._commit()
+        self._session.refresh(row)
+        return _note_schema(row)
+
+    def delete_note(self, note_id: UUID) -> AnalystNote | None:
+        row = self._session.get(AnalystNoteRecord, note_id)
+        if row is None:
+            return None
+        schema = _note_schema(row)
+        self._session.delete(row)
+        self._commit()
+        return schema
+
+    def list_audit(self, case_id: UUID) -> tuple[AuditEvent, ...]:
+        statement = select(AuditEventRecord).where(
+            AuditEventRecord.resource_type == "CASE",
+            AuditEventRecord.resource_id == str(case_id),
+        ).order_by(AuditEventRecord.timestamp.desc())
+        return tuple(_audit_schema(row) for row in self._session.scalars(statement))
+
+    def record_audit(
+        self,
+        *,
+        actor_user_id: UUID | None,
+        action: AuditAction,
+        resource_type: str,
+        resource_id: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> AuditEvent:
+        row = AuditEventRecord(
+            actor_user_id=actor_user_id,
+            action=action.value,
+            resource_type=resource_type[:48],
+            resource_id=resource_id[:128],
+            metadata_json=_safe_metadata(metadata),
+        )
+        self._session.add(row)
+        self._commit()
+        self._session.refresh(row)
+        return _audit_schema(row)
+
+    def list_watchlist(self) -> tuple[WatchlistEntry, ...]:
+        statement = select(IOCWatchlistRecord).order_by(IOCWatchlistRecord.created_at.desc())
+        return tuple(_watchlist_schema(row) for row in self._session.scalars(statement))
+
+    def get_watchlist(self, ioc_type: IOCType, value: str) -> WatchlistEntry | None:
+        statement = select(IOCWatchlistRecord).where(
+            IOCWatchlistRecord.ioc_type == ioc_type.value,
+            IOCWatchlistRecord.normalized_value == value,
+        )
+        row = self._session.scalar(statement)
+        return _watchlist_schema(row) if row is not None else None
+
+    def create_watchlist(
+        self, request: CreateWatchlistRequest, author: UserProfile, value: str
+    ) -> WatchlistEntry:
+        row = IOCWatchlistRecord(
+            ioc_type=request.ioc_type.value,
+            normalized_value=value,
+            created_by_user_id=author.user_id,
+            created_by_display_name=author.display_name,
+            reason=request.reason.strip() if request.reason else None,
+        )
+        self._session.add(row)
+        self._commit()
+        self._session.refresh(row)
+        return _watchlist_schema(row)
+
+    def delete_watchlist(self, watchlist_id: UUID) -> WatchlistEntry | None:
+        row = self._session.get(IOCWatchlistRecord, watchlist_id)
+        if row is None:
+            return None
+        schema = _watchlist_schema(row)
+        self._session.delete(row)
+        self._commit()
+        return schema
 
     def _commit(self) -> None:
         try:

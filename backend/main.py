@@ -18,6 +18,8 @@ from .app.api import (
     health_router,
     infrastructure_router,
     threat_intelligence_router,
+    watchlist_router,
+    workflow_cases_router,
 )
 from .app.core import Settings, get_settings, install_exception_handlers
 from .app.core.middleware import RequestIdMiddleware
@@ -66,7 +68,7 @@ def create_app(
         CORSMiddleware,
         allow_origins=list(runtime_settings.allowed_origins),
         allow_credentials=False,
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type", "Accept"],
     )
     install_exception_handlers(application)
@@ -74,6 +76,8 @@ def create_app(
     application.include_router(auth_router)
     application.include_router(ai_investigator_router)
     application.include_router(cases_router)
+    application.include_router(workflow_cases_router)
+    application.include_router(watchlist_router)
     application.include_router(threat_intelligence_router)
     application.include_router(infrastructure_router)
     return application

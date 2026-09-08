@@ -1,5 +1,6 @@
 import io
 import uuid
+from collections.abc import Sequence
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock
 
@@ -7,7 +8,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.app.schemas import AnalysisStatus, EmailAnalysis
+from backend.app.schemas import AnalystNote, AnalysisStatus, EmailAnalysis
 from backend.app.core import Settings
 from backend.app.db import create_database_engine
 from backend.main import create_app
@@ -15,7 +16,12 @@ from backend.app.services.reporting.interfaces import ReportingService
 from backend.tests.auth_helpers import AUTH_HEADERS, FakeIdentityVerifier
 
 class MockReportingService(ReportingService):
-    async def render_pdf(self, analysis: EmailAnalysis) -> bytes:
+    async def render_pdf(
+        self,
+        analysis: EmailAnalysis,
+        *,
+        analyst_notes: Sequence[AnalystNote] = (),
+    ) -> bytes:
         return b"%PDF-mock"
 
 

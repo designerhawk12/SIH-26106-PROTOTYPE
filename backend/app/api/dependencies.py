@@ -13,7 +13,9 @@ from ..db import (
     CaseRepository,
     SqlAlchemyCaseRepository,
     SqlAlchemyUserProfileRepository,
+    SqlAlchemyWorkflowRepository,
     UserProfileRepository,
+    WorkflowRepository,
 )
 from ..schemas import Permission, UserProfile
 from ..services.auth import (
@@ -49,6 +51,12 @@ def get_user_profile_repository(request: Request) -> Iterator[UserProfileReposit
     factory = cast(sessionmaker[Session], request.app.state.session_factory)
     with factory() as session:
         yield SqlAlchemyUserProfileRepository(session)
+
+
+def get_workflow_repository(request: Request) -> Iterator[WorkflowRepository]:
+    factory = cast(sessionmaker[Session], request.app.state.session_factory)
+    with factory() as session:
+        yield SqlAlchemyWorkflowRepository(session)
 
 
 def get_identity_verifier(request: Request) -> IdentityVerifier:

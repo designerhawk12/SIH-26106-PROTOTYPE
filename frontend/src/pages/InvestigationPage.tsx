@@ -11,6 +11,7 @@ import { IOCDataTable } from "@/components/indicators/IOCDataTable";
 import { InfrastructureHop } from "@/components/infrastructure/InfrastructureHop";
 import { AuthenticationCard } from "@/components/investigation/AuthenticationCard";
 import { AIInvestigatorPanel } from "@/components/investigation/AIInvestigatorPanel";
+import { AnalystNotesPanel, AuditTrailPanel } from "@/components/investigation/AnalystWorkflowPanels";
 import { ExplainableRisk } from "@/components/investigation/ExplainableRisk";
 import {
   InvestigationTabs,
@@ -113,7 +114,8 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
             {tab === "AI Investigator" && (
               <AIInvestigatorPanel caseId={data.case_id} />
             )}
-            {tab === "Timeline" && <TimelineTab analysis={data} />}
+            {tab === "Analyst Notes" && <AnalystNotesPanel caseId={data.case_id} />}
+            {tab === "Audit Trail" && <AuditTrailPanel caseId={data.case_id} />}
             {tab === "Evidence" && <EvidenceTab analysis={data} />}
           </motion.div>
         </AnimatePresence>
@@ -720,28 +722,6 @@ function FindingsTab({ analysis }: { analysis: AnalysisViewModel }) {
         />
       ))}
     </div>
-  );
-}
-
-function TimelineTab({ analysis }: { analysis: AnalysisViewModel }) {
-  return (
-    <Panel spotlight className="max-w-2xl p-6">
-      <SectionHeader
-        eyebrow="Chronology"
-        title="Forensic Timeline"
-      />
-
-      <div className="mt-6">
-        {analysis.timeline.map((event, index) => (
-          <TimelineEvent
-            key={`${event.timestamp}-${event.label}`}
-            event={event}
-            index={index}
-            isLast={index === analysis.timeline.length - 1}
-          />
-        ))}
-      </div>
-    </Panel>
   );
 }
 
