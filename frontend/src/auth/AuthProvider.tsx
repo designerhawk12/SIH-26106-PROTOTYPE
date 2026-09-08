@@ -10,7 +10,7 @@ import {
 } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { getCurrentUser } from "@/services/api";
+import { getCurrentUser, updateCurrentUser } from "@/services/api";
 import type { Permission, UserProfile, UserRole } from "@/types/auth";
 
 interface SignUpResult {
@@ -29,6 +29,7 @@ interface AuthContextValue {
   signUp(email: string, password: string, displayName: string): Promise<SignUpResult>;
   signOut(): Promise<void>;
   refreshProfile(): Promise<void>;
+  updateProfile(update: Pick<UserProfile, "display_name" | "organization">): Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -142,6 +143,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       async refreshProfile() {
         await loadProfile(session);
+      },
+      async updateProfile(update) {
+        const updated = await updateCurrentUser(update);
+        setProfile(updated);
+        setError(null);
       },
     }),
     [error, loadProfile, loading, profile, session],
