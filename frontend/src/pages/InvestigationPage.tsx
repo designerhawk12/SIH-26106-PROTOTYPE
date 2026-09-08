@@ -13,6 +13,7 @@ import { AuthenticationCard } from "@/components/investigation/AuthenticationCar
 import { AIInvestigatorPanel } from "@/components/investigation/AIInvestigatorPanel";
 import { AnalystNotesPanel, AuditTrailPanel } from "@/components/investigation/AnalystWorkflowPanels";
 import { ExplainableRisk } from "@/components/investigation/ExplainableRisk";
+import { RelatedCasesPanel } from "@/components/investigation/RelatedCasesPanel";
 import {
   InvestigationTabs,
   type InvestigationTab,
