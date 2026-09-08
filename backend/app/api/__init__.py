@@ -7,6 +7,8 @@ from .routes import (
     health_router,
     infrastructure_router,
     threat_intelligence_router,
+    watchlist_router,
+    workflow_cases_router,
 )
 
 __all__ = [
@@ -16,5 +18,7 @@ __all__ = [
     "health_router",
     "infrastructure_router",
     "threat_intelligence_router",
+    "watchlist_router",
+    "workflow_cases_router",
 ]
 

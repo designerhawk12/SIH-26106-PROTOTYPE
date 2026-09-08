@@ -4,7 +4,7 @@ import { InvestigationPage } from "@/pages/InvestigationPage";
 
 const title = "Investigation Workspace — Sentinel MX";
 const description =
-  "Full forensic breakdown of a suspicious email: risk explainability, authentication, indicators, infrastructure, AI findings, timeline and evidence.";
+  "Full forensic breakdown of a suspicious email: risk explainability, authentication, indicators, infrastructure, AI findings and evidence.";
 
 export const Route = createFileRoute("/cases/$caseId")({
   head: () => ({

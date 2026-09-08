@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { UserProfile } from "@/types/auth";
 import type { InfrastructureWorkspace } from "@/types/infrastructure";
 import type { RelatedCasesResponse } from "@/types/correlation";
+import type { AnalystNote, AuditEvent, WatchlistEntry } from "@/types/workflow";
 import type {
   AIInvestigationAction,
   AIInvestigatorResponse,
@@ -356,6 +357,32 @@ export async function getRelatedCases(caseId: string): Promise<RelatedCasesRespo
     };
   }
   return requestJson<RelatedCasesResponse>(`/api/v1/cases/${caseId}/related`);
+export async function getCaseNotes(caseId: string): Promise<AnalystNote[]> {
+  return (await requestJson<{ items: AnalystNote[] }>(`/api/v1/cases/${caseId}/notes`)).items;
+}
+
+export async function createCaseNote(caseId: string, content: string): Promise<AnalystNote> {
+  return requestJson<AnalystNote>(`/api/v1/cases/${caseId}/notes`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content }),
+  });
+}
+
+export async function getCaseAudit(caseId: string): Promise<AuditEvent[]> {
+  return (await requestJson<{ items: AuditEvent[] }>(`/api/v1/cases/${caseId}/audit`)).items;
+}
+
+export async function getWatchlist(): Promise<WatchlistEntry[]> {
+  return (await requestJson<{ items: WatchlistEntry[] }>("/api/v1/watchlist")).items;
+}
+
+export async function watchIOC(ioc_type: WatchlistEntry["ioc_type"], value: string): Promise<WatchlistEntry> {
+  return requestJson<WatchlistEntry>("/api/v1/watchlist", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ioc_type, value }),
+  });
+}
+
+export async function unwatchIOC(watchlistId: string): Promise<void> {
+  await request(`/api/v1/watchlist/${watchlistId}`, { method: "DELETE" });
 }
 
 export async function investigateCase(

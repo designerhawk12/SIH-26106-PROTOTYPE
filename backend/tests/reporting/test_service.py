@@ -1,9 +1,11 @@
+import io
 import uuid
 from datetime import datetime, timezone
 
 import pytest
 
 from backend.app.schemas import (
+    AnalystNote,
     AnalysisStatus,
     AttachmentEvidence,
     DetectionCategory,
@@ -263,4 +265,32 @@ async def test_functionally_deterministic_report(mock_analysis: EmailAnalysis):
     text_2 = "".join(page.extract_text() for page in PdfReader(io.BytesIO(pdf_bytes_2)).pages)
     
     assert text_1 == text_2
+
+
+@pytest.mark.asyncio
+async def test_persisted_analyst_notes_are_safely_rendered(
+    mock_analysis: EmailAnalysis,
+):
+    """Notes are distinct commentary, safely escaped, and never fetched externally."""
+    created_at = datetime(2026, 9, 8, 10, 0, tzinfo=timezone.utc)
+    note = AnalystNote(
+        note_id=uuid.uuid4(),
+        case_id=mock_analysis.case_id,
+        author_user_id=uuid.uuid4(),
+        author_display_name="Senior Analyst <review>",
+        content="Confirm with finance before action. <script>doNotRun()</script>",
+        created_at=created_at,
+        updated_at=created_at,
+    )
+
+    pdf_bytes = await build_reporting_service().render_pdf(
+        mock_analysis, analyst_notes=(note,)
+    )
+    from pypdf import PdfReader
+
+    text = "".join(page.extract_text() for page in PdfReader(io.BytesIO(pdf_bytes)).pages)
+    assert "Analyst commentary - not part of original forensic evidence." in text
+    assert "Senior Analyst <review>" in text
+    assert "Confirm with finance before action." in text
+    assert "<script>doNotRun()</script>" in text
 

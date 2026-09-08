@@ -140,6 +140,7 @@ def test_cors_preflight_allows_bearer_auth_and_profile_updates() -> None:
     assert response.status_code == 200
     assert "authorization" in response.headers["access-control-allow-headers"].lower()
     assert "PATCH" in response.headers["access-control-allow-methods"]
+    assert "DELETE" in response.headers["access-control-allow-methods"]
 
 
 def test_supabase_verifier_normalizes_verified_user() -> None:

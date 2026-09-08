@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Database, FileKey2, Globe2, Link2, Radar, Search, ServerCog } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
@@ -6,7 +6,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Panel } from "@/components/ui/Panel";
 import { ThreatBadge, type BadgeTone } from "@/components/ui/ThreatBadge";
-import { getErrorMessage, getThreatIntelligenceWorkspace } from "@/services/api";
+import { getErrorMessage, getThreatIntelligenceWorkspace, getWatchlist, unwatchIOC, watchIOC } from "@/services/api";
+import type { WatchlistEntry } from "@/types/workflow";
 import type {
   IntelligenceStatus,
   IOCType,
@@ -97,12 +98,18 @@ function IntelligenceTable({
   rows,
   valueHeading,
   secondary,
+  watched,
+  onToggleWatch,
+  pending,
 }: {
   title: string;
   icon: ReactNode;
   rows: ThreatIOCRecord[];
   valueHeading: string;
   secondary?(record: ThreatIOCRecord): ReactNode;
+  watched: Map<string, WatchlistEntry>;
+  onToggleWatch(record: ThreatIOCRecord): void;
+  pending: boolean;
 }) {
   return (
     <Panel className="overflow-hidden p-0">
@@ -117,7 +124,7 @@ function IntelligenceTable({
         <table className="w-full min-w-[900px] border-collapse text-left">
           <thead>
             <tr className="border-b border-border">
-              {[valueHeading, "Reputation", "Provider", "Intelligence", "Associated cases"].map(
+              {[valueHeading, "Reputation", "Provider", "Intelligence", "Watchlist", "Associated cases"].map(
                 (heading) => (
                   <th
                     key={heading}
@@ -167,13 +174,24 @@ function IntelligenceTable({
                   )}
                 </td>
                 <td className="px-5 py-4">
+                  {(() => {
+                    const entry = watched.get(`${record.ioc_type}:${record.value}`);
+                    return <div className="flex flex-col items-start gap-2">
+                      {entry && <ThreatBadge label="WATCHED" tone="accent" />}
+                      <ActionButton variant={entry ? "ghost" : "secondary"} disabled={pending} onClick={() => onToggleWatch(record)}>
+                        {entry ? "Unwatch IOC" : "Watch IOC"}
+                      </ActionButton>
+                    </div>;
+                  })()}
+                </td>
+                <td className="px-5 py-4">
                   <CaseLinks record={record} />
                 </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-9 text-center text-xs text-muted-foreground">
+                <td colSpan={6} className="px-5 py-9 text-center text-xs text-muted-foreground">
                   No persisted indicators match this section and the active filters.
                 </td>
               </tr>
@@ -194,6 +212,11 @@ export function ThreatIntelligencePage() {
     queryFn: getThreatIntelligenceWorkspace,
     retry: false,
   });
+  const queryClient = useQueryClient();
+  const watchlist = useQuery({ queryKey: ["watchlist"], queryFn: getWatchlist, retry: false });
+  const refreshWatchlist = () => void queryClient.invalidateQueries({ queryKey: ["watchlist"] });
+  const watch = useMutation({ mutationFn: ({ ioc_type, value }: { ioc_type: WatchlistEntry["ioc_type"]; value: string }) => watchIOC(ioc_type, value), onSuccess: refreshWatchlist });
+  const unwatch = useMutation({ mutationFn: unwatchIOC, onSuccess: refreshWatchlist });
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -247,6 +270,12 @@ export function ThreatIntelligencePage() {
     workspace.data.indicators.some((item) => item.demo) || providers.some((item) => item.demo);
   const rowsFor = (type: IOCType) => filtered.filter((record) => record.ioc_type === type);
   const show = (type: IOCType) => iocType === "ALL" || iocType === type;
+  const watched = new Map((watchlist.data ?? []).map((entry) => [`${entry.ioc_type}:${entry.value}`, entry]));
+  const toggleWatch = (record: ThreatIOCRecord) => {
+    const entry = watched.get(`${record.ioc_type}:${record.value}`);
+    if (entry) unwatch.mutate(entry.watchlist_id);
+    else watch.mutate({ ioc_type: record.ioc_type as WatchlistEntry["ioc_type"], value: record.value });
+  };
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
@@ -346,6 +375,9 @@ export function ThreatIntelligencePage() {
             icon={<Globe2 className="h-4 w-4" />}
             rows={rowsFor("IP_ADDRESS")}
             valueHeading="IP address"
+            watched={watched}
+            onToggleWatch={toggleWatch}
+            pending={watch.isPending || unwatch.isPending}
           />
         )}
       {summary.total_observed_iocs > 0 &&
@@ -356,6 +388,9 @@ export function ThreatIntelligencePage() {
             icon={<Radar className="h-4 w-4" />}
             rows={rowsFor("DOMAIN")}
             valueHeading="Domain"
+            watched={watched}
+            onToggleWatch={toggleWatch}
+            pending={watch.isPending || unwatch.isPending}
           />
         )}
       {summary.total_observed_iocs > 0 &&
@@ -366,6 +401,9 @@ export function ThreatIntelligencePage() {
             icon={<Link2 className="h-4 w-4" />}
             rows={rowsFor("URL")}
             valueHeading="URL"
+            watched={watched}
+            onToggleWatch={toggleWatch}
+            pending={watch.isPending || unwatch.isPending}
             secondary={(record) => (
               <p className="mt-1 text-[11px] text-muted-foreground">
                 Domain: {domainFromUrl(record.value)}
@@ -381,6 +419,9 @@ export function ThreatIntelligencePage() {
             icon={<FileKey2 className="h-4 w-4" />}
             rows={rowsFor("ATTACHMENT_SHA256")}
             valueHeading="SHA-256"
+            watched={watched}
+            onToggleWatch={toggleWatch}
+            pending={watch.isPending || unwatch.isPending}
           />
         )}
 
