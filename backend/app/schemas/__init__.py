@@ -1,6 +1,13 @@
 """Authoritative public exports for shared contracts."""
 
 from .analysis import EmailAnalysis, TimelineEvent
+from .correlation import (
+    CorrelationIndicatorType,
+    CorrelationStrength,
+    RelatedCase,
+    RelatedCasesResponse,
+    SharedIndicator,
+)
 from .ai_investigator import (
     AIAskRequest,
     AIInvestigationAction,
@@ -73,6 +80,8 @@ __all__ = [
     "AuthenticationVerdict",
     "CaseListResponse",
     "CaseSummary",
+    "CorrelationIndicatorType",
+    "CorrelationStrength",
     "ContractModel",
     "DetectionCategory",
     "DetectionFinding",
@@ -96,10 +105,13 @@ __all__ = [
     "ProviderWorkspaceStatus",
     "ReceivedHop",
     "ReputationVerdict",
+    "RelatedCase",
+    "RelatedCasesResponse",
     "RiskLevel",
     "RiskReason",
     "RiskResult",
     "Severity",
+    "SharedIndicator",
     "ThreatFinding",
     "ThreatCaseReference",
     "ThreatIntelligenceWorkspace",

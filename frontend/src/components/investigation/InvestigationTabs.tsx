@@ -9,6 +9,7 @@ export const INVESTIGATION_TABS = [
   "Infrastructure",
   "AI Findings",
   "AI Investigator",
+  "Related Cases",
   "Timeline",
   "Evidence",
 ] as const;

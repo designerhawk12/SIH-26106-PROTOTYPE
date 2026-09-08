@@ -12,6 +12,7 @@ import { InfrastructureHop } from "@/components/infrastructure/InfrastructureHop
 import { AuthenticationCard } from "@/components/investigation/AuthenticationCard";
 import { AIInvestigatorPanel } from "@/components/investigation/AIInvestigatorPanel";
 import { ExplainableRisk } from "@/components/investigation/ExplainableRisk";
+import { RelatedCasesPanel } from "@/components/investigation/RelatedCasesPanel";
 import {
   InvestigationTabs,
   type InvestigationTab,
@@ -113,6 +114,7 @@ export function InvestigationPage({ caseId }: { caseId: string }) {
             {tab === "AI Investigator" && (
               <AIInvestigatorPanel caseId={data.case_id} />
             )}
+            {tab === "Related Cases" && <RelatedCasesPanel caseId={data.case_id} />}
             {tab === "Timeline" && <TimelineTab analysis={data} />}
             {tab === "Evidence" && <EvidenceTab analysis={data} />}
           </motion.div>

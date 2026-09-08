@@ -3,6 +3,7 @@ import { sampleAnalysis, sampleCases, sampleStats } from "@/mocks/sampleAnalysis
 import { supabase } from "@/integrations/supabase/client";
 import type { UserProfile } from "@/types/auth";
 import type { InfrastructureWorkspace } from "@/types/infrastructure";
+import type { RelatedCasesResponse } from "@/types/correlation";
 import type {
   AIInvestigationAction,
   AIInvestigatorResponse,
@@ -339,6 +340,22 @@ export async function getCase(caseId: string): Promise<AnalysisViewModel> {
     return toAnalysisView({ ...sampleAnalysis, case_id: caseId });
   }
   return toAnalysisView(await requestJson<EmailAnalysis>(`/api/v1/cases/${caseId}`));
+}
+
+/** Read persisted comparisons only; this endpoint never triggers providers or AI. */
+export async function getRelatedCases(caseId: string): Promise<RelatedCasesResponse> {
+  if (USE_MOCK) {
+    return {
+      case_id: caseId,
+      items: [],
+      total: 0,
+      limit: 25,
+      offset: 0,
+      disclaimer:
+        "Potential relationships are deterministic comparisons of persisted forensic evidence.",
+    };
+  }
+  return requestJson<RelatedCasesResponse>(`/api/v1/cases/${caseId}/related`);
 }
 
 export async function investigateCase(

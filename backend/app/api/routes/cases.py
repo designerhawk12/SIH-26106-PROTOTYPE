@@ -21,11 +21,13 @@ from ...schemas import (
     CaseSummary,
     EmailAnalysis,
     Permission,
+    RelatedCasesResponse,
     RiskLevel,
     UserProfile,
 )
 from ...services.export.interfaces import EvidenceExportService
 from ...services.orchestrator import EmailAnalysisError
+from ...services.orchestrator.correlation import correlate_case
 from ...services.orchestrator.interfaces import AnalysisOrchestrator
 from ...services.reporting.interfaces import ReportingService
 from ..dependencies import (
@@ -146,6 +148,29 @@ async def get_case(
             message="The requested case was not found.",
         )
     return analysis
+
+
+@router.get("/{case_id}/related", response_model=RelatedCasesResponse)
+async def get_related_cases(
+    case_id: UUID,
+    repository: Annotated[CaseRepository, Depends(get_case_repository)],
+    _user: Annotated[
+        UserProfile, Depends(require_permission(Permission.ACCESS_CAMPAIGNS))
+    ],
+    limit: Annotated[int, Query(ge=1, le=100)] = 25,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> RelatedCasesResponse:
+    """Compare persisted forensic evidence; never invoke enrichment providers."""
+
+    analysis = await _run_database_operation(repository.get_analysis, case_id)
+    if analysis is None:
+        raise AppError(
+            status_code=404,
+            code="CASE_NOT_FOUND",
+            message="The requested case was not found.",
+        )
+    analyses = await _run_database_operation(repository.list_analyses)
+    return correlate_case(analysis, analyses, limit=limit, offset=offset)
 
 
 @router.get("/{case_id}/report", response_class=Response)
