@@ -1,0 +1,281 @@
+Delivered-To: designerhawk12@gmail.com
+Received: by 2002:adf:e0d0:0:b0:482:c3fd:17d6 with SMTP id m16csp9244322wri;
+        Mon, 7 Sep 2026 21:10:39 -0700 (PDT)
+X-Received: by 2002:a05:620a:2d85:b0:939:6de6:9516 with SMTP id af79cd13be357-93980485f20mr2109928185a.45.1788840639664;
+        Mon, 07 Sep 2026 21:10:39 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1788840639; cv=none;
+        d=google.com; s=arc-20260327;
+        b=Ygn2gbMa0OQzOrmBk1QGq2mt90ibHaWoKAIp8xdwjjdHOyWrpjeEvgANAuXyl+uziu
+         fKLZRmrC7c0jdIO2LjDPy3fGXg/4UREjsERKBME6g2O8kb3XXibChY7G4Z9cJVAx1hSU
+         rumTBV16W/TPb6ZYapltjr+aIzJne7MW+ac2gvnqbZT1zSuvxk5qcKu+Po1EMfPSkQFR
+         mHUmq5xXka07qi7SAbbce3ODlNHhyktycxo0nl82cnO9RcOZLXGFiJHxiCpKfDT6t5Xj
+         NsEAIwPVzHfHYJnggEy+o6h5XmCXFVDCH4FmbPo6ibN0aHAlCNMtA7V0F28754SUEkN1
+         M0tg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=feedback-id:list-unsubscribe-post:list-unsubscribe:mime-version
+         :subject:message-id:to:reply-to:from:date:dkim-signature
+         :dkim-signature;
+        bh=H8oEumBZnvQ3Y/fFwTE7Q75bqF8FzrbIqpBLfWRjlmk=;
+        fh=FPY5kd7TG4z4UEW6EOcBdwHrXmNgv1d/sqTV2Yz7WUE=;
+        b=PNZzaH4MUI4EuKq5iZSS2mkpEoQngA5GknFtPI+U4oSo1s11IAXbzxCOs9leFd89ld
+         spkVfSE5vuSEcSjKQynNG5+zUQbep3WBeNSptHb44i4j2Ni3ZvKrsilQHDelNHu0pqeQ
+         XNAWL8R/IeTySRYwa6OR0CZDhLEYlRe3rW3SIwtXAVObhr4ocSKLL3SxSyAPqFjpZRuY
+         ifCAe63F8kzmcF3fVHOtDbQ8Y4zjNZ0OWfebaUhmdI6mtaGQPo6vn+CqxZyAjjoYMLyn
+         2Z2UbSFclcRjo9fUtxmW3p1hFpbsqA9qCvirQomVhGZj+bskclUME5Ol9U2k7tJjl671
+         giTw==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@updates.truecaller.com header.s=pepipost header.b=Dcl6ljs1;
+       dkim=pass header.i=@env.etransmail.com header.s=fnc header.b=WesIfdYa;
+       spf=pass (google.com: domain of 17888085623493209-125774-1-gmail.com@delivery.updates.truecaller.com designates 103.66.105.172 as permitted sender) smtp.mailfrom=17888085623493209-125774-1-gmail.com@delivery.updates.truecaller.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=truecaller.com
+Return-Path: <17888085623493209-125774-1-gmail.com@delivery.updates.truecaller.com>
+Received: from 105-172-smtp-out-us.ncmail03.com (105-172-smtp-out-us.ncmail03.com. [103.66.105.172])
+        by mx.google.com with ESMTPS id 6a1803df08f44-9105a06c73asi58345616d6.102.2026.09.07.21.10.39
+        for <designerhawk12@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Sep 2026 21:10:39 -0700 (PDT)
+Received-SPF: pass (google.com: domain of 17888085623493209-125774-1-gmail.com@delivery.updates.truecaller.com designates 103.66.105.172 as permitted sender) client-ip=103.66.105.172;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@updates.truecaller.com header.s=pepipost header.b=Dcl6ljs1;
+       dkim=pass header.i=@env.etransmail.com header.s=fnc header.b=WesIfdYa;
+       spf=pass (google.com: domain of 17888085623493209-125774-1-gmail.com@delivery.updates.truecaller.com designates 103.66.105.172 as permitted sender) smtp.mailfrom=17888085623493209-125774-1-gmail.com@delivery.updates.truecaller.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=truecaller.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=updates.truecaller.com; s=pepipost;
+	h=feedback-id:list-unsubscribe-post:list-unsubscribe:content-type:mime-version:
+	 subject:message-id:to:reply-to:from:from:to:subject;
+	bh=H8oEumBZnvQ3Y/fFwTE7Q75bqF8FzrbIqpBLfWRjlmk=;
+	b=Dcl6ljs1t1GlE6qtJox2dgQWA2rQzaSbjUqLvZ5ILsRe1OU3/C5wWgchaX0sTcrkEprHUp0O//ZHA
+	 /xUltU/+uv0PsORrBnaIQtOUR+SP1L4TAXwbK+h6P1u+bCZrYGEp76J6FcN7bF074VOPFrrmzWTFN7
+	 RSu1CoXDI5CsuZ0o=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=env.etransmail.com; s=fnc;
+	h=feedback-id:list-unsubscribe-post:list-unsubscribe:content-type:mime-version:
+	 subject:message-id:to:reply-to:from:from:to:subject;
+	bh=H8oEumBZnvQ3Y/fFwTE7Q75bqF8FzrbIqpBLfWRjlmk=;
+	b=WesIfdYauX60aZkws3ejXBAABwehlqN06EW91DDLqnfX2sviGxN8IX5ebI1ZNeqMcapY+eOpeWbuo
+	 SUizEx4hf2kQr1POQq3WPW9i/ja7toKuPKxf2JFw+IwrGTrlTA0mhwR30QHXBhPTKcKZ3GoSdrdWLR
+	 ChiBEXgnJDl0n/3c=
+Date: Tue, 08 Sep 2026 09:40:39 +0530
+From: Truecaller <hello@updates.truecaller.com>
+Reply-To: support@truecaller.com
+To: designerhawk12@gmail.com
+Message-ID: <1625162561.312757.1788840638320@ip-10-12-51-134.ap-south-1.compute.internal>
+Subject: =?UTF-8?Q?=E2=9A=A0=EF=B8=8F_Fix_Caller_ID_now_=E2=80=94_sp?=
+ =?UTF-8?Q?am_calls_are_reaching_you?=
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_312756_1698305396.1788840638320"
+X-CleverTap_META: designerhawk12@gmail.com|1529478528|1785823034|20260908|0|wzrk_default|-3221441718|-1|-1|
+X-CLEVERTAP_METADATA: {"X-CLEVERTAP_TARGET_ID": 1785823034, "X-CLEVERTAP_IID": {"$numberLong": "3946273838"}, "X-CLEVERTAP_IDN": {"$numberLong": "3221441718"}, "X-CLEVERTAP_PIVOT": "wzrk_default"}
+List-Unsubscribe: <https://in1.clevertap-prod.com/unsubscribe?hosting_type=system&one_click=true&sub=0&p=LHg7IlYSCxQseHYlIjcwLkB8XloweGhrdWlrfwQCBgdvaWppKnZyaVtUXxZteilpczQnJlBVQ3g4NDVpbXpweAACAABja2V6b3gvZxISQV0hNSZpbXpwPEhCWmszPzQqIjYmaR4QE1cCKQtpbXopaRZeRFk1PyAHODQ1aQgQEwR1Jy8%3D&e=Zm9gcgYHCQFlYk16YGJncwADAQdjRWB7ZWxicgIILlAyKTssOT8gI1NHWgVlGjUmNjM%2BZVFfXCsfDh8H&encoded=true&wzrk_ex=0>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+X-InjTime: 1788840638
+Feedback-ID: MTI1Nzc0OjIwMjYwOTA4XzA5Og==:pepipostE
+X-FNCID: 125774-17888085623493209-0
+X-Traffic-Type: 125774-3
+X-Mailer: NetcoreCloud Mailer
+
+------=_Part_312756_1698305396.1788840638320
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html> <!doctype html=3D""> <html lang=3D"en" xmlns:o=3D"urn:schem=
+as-microsoft-com:office:office" xmlns:v=3D"urn:schemas-microsoft-com:vml"> =
+<head>  <title></title>  <!--[if mso]> <xml> <w:WordDocument xmlns:w=3D"urn=
+:schemas-microsoft-com:office:word"> <w:DontUseAdvancedTypographyReadingMai=
+l/> </w:WordDocument> <o:OfficeDocumentSettings> <o:PixelsPerInch>96</o:Pix=
+elsPerInch> <o:AllowPNG/> </o:OfficeDocumentSettings> </xml> <![endif]-->  =
+<style type=3D"text/css">:root{ color-scheme: light only; supported-color-s=
+chemes: light only; } body{ margin:0; padding:0; background:#ffffff; } tabl=
+e{ border-collapse:collapse; } img{ border:0; display:block; }  </style> </=
+head> <body style=3D"font-family: Arial, 'Helvetica Neue', Helvetica, sans-=
+serif;"><span class=3D"preheader" style=3D"color:blue; display:none !import=
+ant;height:0; opacity:0; visibility:hidden; width:0">You're unprotected unt=
+il you fix this.</span><!-- PREHEADER (hidden) --> <div style=3D"display:no=
+ne;font-size:1px;color:#ffffff;line-height:1px;max-height:0;max-width:0;opa=
+city:0;overflow:hidden;">You&#39;re unprotected until you fix this.</div>  =
+<table cellpadding=3D"0" cellspacing=3D"0" style=3D"background:#ffffff;" wi=
+dth=3D"100%">  <tbody>   <tr>    <td align=3D"center">    <table cellpaddin=
+g=3D"0" cellspacing=3D"0" style=3D"background:#ffffff;" width=3D"500">     =
+<tbody><!-- LOGO -->      <tr>       <td align=3D"center" style=3D"padding:=
+20px 0;"><img alt=3D"Truecaller" src=3D"https://d2ib3d3buwaot6.cloudfront.n=
+et/1529478528/assets/c8ab32f7534541e4ad745540b349d6f8.png" width=3D"200" />=
+</td>      </tr>      <!-- TITLE -->      <tr>       <td style=3D"padding:2=
+0px 15px 28px 15px;font-family:Poppins,Helvetica,sans-serif;">       <p sty=
+le=3D"font-size:28px;font-weight:bold;margin:0;color:#000;line-height:36px;=
+">You&#39;re missing Caller ID protection</p>       </td>      </tr>      <=
+!-- BANNER -->      <tr>       <td align=3D"center" style=3D"padding:0 15px=
+ 26px 15px;"><a href=3D"https://delivery.updates.truecaller.com/PDQIOGUBX?i=
+d=3D125774=3DIksBAFRXBgcDTgRRUwNVAgAABAxaBANaAAJXV1cFUVRZU1VQUwMGCVYGAVZQUA=
+9QUwcdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC0lNV=
+VVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D&fl=3DCUNF=
+QRVYHh9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg4SUJnQjZZd0Il=
+MkJEU1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWFFrUHlFNFBqVTh=
+GRkZmWGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoRW5Qams1TGxaTV=
+NoWWdJQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJhVVZLUTE4SUtqc=
+zlPQzV3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJGJTJGdHJ1ZWNh=
+bGxlci5jb20lMkZkJTJGaG9tZSUyRnNldHRpbmdzJTJGc2V0dGluZ3NfY2FsbGluZyZjPTc1MTE=
+5ODQ0OCZ0b2tlbj1EbEZmQmd0VkF3Z0EmdHJ5PTEmJGZvbGxvd19yZWRpcmVjdD10cnVl" styl=
+e=3D"text-decoration:none;display:block;"><img alt=3D"Alert: You're missing=
+ essential permissions" src=3D"https://d2ib3d3buwaot6.cloudfront.net/152947=
+8528/assets/8078815af2e94024bb59540fc3fb0b1f.png" style=3D"width:400px;max-=
+width:100%;height:auto;border-radius:20px;display:block;border:0;" width=3D=
+"400" /></a></td>      </tr>      <!-- CONTENT -->      <tr>       <td styl=
+e=3D"padding:6px 15px 6px 15px;font-family:Poppins,Helvetica,sans-serif;fon=
+t-size:18px;color:#555;line-height:28px;">       <p style=3D"margin: 0px; t=
+ext-align: center;">Without it, Truecaller can&#39;t show who&#39;s calling=
+ or block spam calls. Granting access takes 10 seconds.</p>       </td>    =
+  </tr>      <!-- CTA BUTTON -->      <tr>       <td align=3D"center" style=
+=3D"padding:22px 0 28px 0;"><a href=3D"https://delivery.updates.truecaller.=
+com/PDQIOGUBX?id=3D125774=3DIksBAFRXBgcDTgRRUwNVAgAABAxaBANaAAJXV1cFUVRZU1V=
+QUwMGCVYGAVZQUA9QUwcdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUV=
+RcSAwWFUdCC0lNVVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQ=
+lA=3D&fl=3DCUNFQRVYHh9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZ=
+mg4SUJnQjZZd0IlMkJEU1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1j=
+WFFrUHlFNFBqVThGRkZmWGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWV=
+oRW5Qams1TGxaTVNoWWdJQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMk=
+JhVVZLUTE4SUtqczlPQzV3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJ=
+TJGJTJGdHJ1ZWNhbGxlci5jb20lMkZkJTJGaG9tZSUyRnNldHRpbmdzJTJGc2V0dGluZ3NfY2Fs=
+bGluZyZjPTc1MTE5ODQ0OCZ0b2tlbj1EbEZmQmd0VkF3Z0EmdHJ5PTEmJGZvbGxvd19yZWRpcmV=
+jdD10cnVl" style=3D"background: rgb(10, 108, 255); color: rgb(255, 255, 255=
+); padding: 18px 60px; border-radius: 30px; font-family: Poppins, Helvetica=
+, sans-serif; font-size: 18px; font-weight: 600; text-decoration: none; dis=
+play: inline-block;">Fix Caller ID</a></td>      </tr>      <!-- SIGN OFF -=
+->      <tr>       <td style=3D"padding:0 15px 22px 15px;font-family:Poppin=
+s,Helvetica,sans-serif;font-size:14px;color:#555;line-height:20px;">       =
+<p style=3D"margin:0;">Stay safe,<br />       Team Truecaller</p>       </t=
+d>      </tr>      <!-- FOOTER -->      <tr>       <td style=3D"background:=
+#E5F3FF;padding:20px 30px;font-family:Poppins,Helvetica,sans-serif;">      =
+ <table cellpadding=3D"0" cellspacing=3D"0" width=3D"100%">        <tbody> =
+        <tr>          <td style=3D"font-size:12px;line-height:16px;padding-=
+bottom:15px;">This message has been sent to you for registering on truecall=
+er app. If you do not want to receive these emails from Truecaller, you can=
+ unsubscribe in the link below.</td>         </tr>         <tr>          <t=
+d style=3D"padding-bottom:15px;">          <table cellpadding=3D"0" cellspa=
+cing=3D"0">           <tbody>            <tr>             <td style=3D"padd=
+ing-right:10px;"><a href=3D"https://delivery.updates.truecaller.com/PDQIOGU=
+BX?id=3D125774=3DIksBAFRXBgcDTgdVXFJTBwEHVQ1RUwYBWgNRVwdRUwFRA1MCUVEAVQYLAF=
+xdBlAABVYdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC=
+0lNVVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D&fl=3D=
+CUNFQRVYHh9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg4SUJnQjZZ=
+d0IlMkJEU1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWFFrUHlFNFB=
+qVThGRkZmWGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoRW5Qams1TG=
+xaTVNoWWdJQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJhVVZLUTE4S=
+UtqczlPQzV3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJGJTJGd3d3=
+LmZhY2Vib29rLmNvbSUyRlRydWVjYWxsZXImYz03NTExOTg0NDgmdG9rZW49R2xWZUF3UlNCZ1F=
+FQndBJTNEJnRyeT0xJiRmb2xsb3dfcmVkaXJlY3Q9dHJ1ZQ=3D=3D"><img src=3D"http://i=
+mg.ncm15.com/images/Truecaller_20230724_143612/icon-facebook@2x.png" width=
+=3D"28" /></a></td>             <td style=3D"padding-right:10px;"><a href=
+=3D"https://delivery.updates.truecaller.com/PDQIOGUBX?id=3D125774=3DIksBAFR=
+XBgcDTlpWVAAEAgFSBQVRVwBdAV4GB1cEUVIFAwZVXwNSAlQEUVQAVgZdVgEdUAZCC19XAxEMBE=
+MPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC0lNVVVbWxQBFxwYERRQAEAGQ=
+kxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D&fl=3DCUNFQRVYHh9eXFNKEgxMFgtX=
+ClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg4SUJnQjZZd0IlMkJEU1poY2dZR0F3TmtZ=
+bUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWFFrUHlFNFBqVThGRkZmWGw4JTJCUHhJTEs=
+yc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoRW5Qams1TGxaTVNoWWdJQ0FnQ0RNMmFRZ1=
+NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJhVVZLUTE4SUtqczlPQzV3Y1JCSFMwWThCV=
+Fl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJGJTJGdHdpdHRlci5jb20lMkZUcnVlY2Fs=
+bGVyJmM9NzUxMTk4NDQ4JnRva2VuPUJsTlVBUVZYQlFRSEFnJTNEJTNEJnRyeT0xJiRmb2xsb3d=
+fcmVkaXJlY3Q9dHJ1ZQ=3D=3D"><img src=3D"http://img.ncm15.com/images/Truecall=
+er_20230724_143808/icon-twitter@2x.png" width=3D"28" /></a></td>           =
+  <td style=3D"padding-right:10px;"><a href=3D"https://delivery.updates.tru=
+ecaller.com/PDQIOGUBX?id=3D125774=3DIksBAFRXBgcDTgFUVlAHUl1WUVJVBgNZD15VVQd=
+XUVtSAwgJAgFSUQ9QVwAEAFMCAVUdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQ=
+NRDABVUVRcSAwWFUdCC0lNVVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ=
+25bDVAdQlA=3D&fl=3DCUNFQRVYHh9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZ=
+T1LMklBZmg4SUJnQjZZd0IlMkJEU1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0=
+bGVncE1jWFFrUHlFNFBqVThGRkZmWGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5=
+FV0ZzNWVoRW5Qams1TGxaTVNoWWdJQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdD=
+diM2glMkJhVVZLUTE4SUtqczlPQzV3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0d=
+HBzJTNBJTJGJTJGd3d3LnlvdXR1YmUuY29tJTJGYyUyRnRydWVjYWxsZXImYz03NTExOTg0NDgm=
+dG9rZW49R2xWV0F3ZFFBZ01OQWclM0QlM0QmdHJ5PTEmJGZvbGxvd19yZWRpcmVjdD10cnVl"><=
+img src=3D"http://img.ncm15.com/images/Truecaller_20230724_143928/icon-yout=
+ube@2x.png" width=3D"28" /></a></td>             <td style=3D"padding-right=
+:10px;"><a href=3D"https://delivery.updates.truecaller.com/PDQIOGUBX?id=3D1=
+25774=3DIksBAFRXBgcDTgFUBFZSVwVXWAcFVAMBCgMCU1QDVldYVFBSUFtSVQZUVV0GXAVQBVc=
+dUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC0lNVVVbWx=
+QBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D&fl=3DCUNFQRVYH=
+h9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg4SUJnQjZZd0IlMkJEU=
+1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWFFrUHlFNFBqVThGRkZm=
+WGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoRW5Qams1TGxaTVNoWWd=
+JQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJhVVZLUTE4SUtqczlPQz=
+V3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJGJTJGd3d3LmxpbmtlZ=
+GluLmNvbSUyRmNvbXBhbnklMkZ0cnVlY2FsbGVyJTJGJmM9NzUxMTk4NDQ4JnRva2VuPUJsSlNB=
+QUZWQndZQkN3JTNEJTNEJnRyeT0xJiRmb2xsb3dfcmVkaXJlY3Q9dHJ1ZQ=3D=3D"><img src=
+=3D"http://img.ncm15.com/images/Truecaller_20230724_143733/icon-linkedin@2x=
+.png" width=3D"28" /></a></td>             <td style=3D"padding-right:10px;=
+"><a href=3D"https://delivery.updates.truecaller.com/PDQIOGUBX?id=3D125774=
+=3DIksBAFRXBgcDTlUAVFNVUFYGVlUHUFoBDQJRVARWVVUCBwAIBwAABwVXBgJWUQ9dVAAdUAZC=
+C19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC0lNVVVbWxQBFxw=
+YERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D&fl=3DCUNFQRVYHh9eXF=
+NKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg4SUJnQjZZd0IlMkJEU1poY2=
+dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWFFrUHlFNFBqVThGRkZmWGw4J=
+TJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoRW5Qams1TGxaTVNoWWdJQ0Fn=
+Q0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJhVVZLUTE4SUtqczlPQzV3Y1J=
+CSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJGJTJGd3d3Lmluc3RhZ3JhbS=
+5jb20lMkZ0cnVlY2FsbGVyJmM9NzUxMTk4NDQ4JnRva2VuPUdsZFNCUUJWQndnRkF3JTNEJTNEJ=
+nRyeT0xJiRmb2xsb3dfcmVkaXJlY3Q9dHJ1ZQ=3D=3D"><img src=3D"http://img.ncm15.c=
+om/images/Truecaller_20230724_143650/icon-instagram@2x.png" width=3D"28" />=
+</a></td>             <td><a href=3D"https://delivery.updates.truecaller.co=
+m/PDQIOGUBX?id=3D125774=3DIksBAFRXBgcDTgZXXARXUgZWUg1XCQEBXFcHU10HVgRTVVQFV=
+QBSBVUCU1IEAQdcAQQdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRc=
+SAwWFUdCC0lNVVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=
+=3D&fl=3DCUNFQRVYHh9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg=
+4SUJnQjZZd0IlMkJEU1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWF=
+FrUHlFNFBqVThGRkZmWGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoR=
+W5Qams1TGxaTVNoWWdJQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJh=
+VVZLUTE4SUtqczlPQzV3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJ=
+GJTJGd3d3LnRydWVjYWxsZXIuY29tJTJGYmxvZyZjPTc1MTE5ODQ0OCZ0b2tlbj1CbDFVQkFCVU=
+FRVUdBQSUzRCUzRCZ0cnk9MSYkZm9sbG93X3JlZGlyZWN0PXRydWU=3D"><img src=3D"http:=
+//img.ncm15.com/images/Truecaller_20230724_143850/icon-web@2x.png" width=3D=
+"28" /></a></td>            </tr>           </tbody>          </table>     =
+     </td>         </tr>         <tr>          <td>          <table width=
+=3D"100%">           <tbody>            <tr>             <td align=3D"left"=
+ style=3D"font-size:12px;font-weight:600;">=C2=A9 2026 Truecaller AB</td>  =
+           <td align=3D"right" style=3D"font-size:12px;font-weight:600;"><a=
+ href=3D"https://delivery.updates.truecaller.com/PDQIOGUBX?id=3D125774=3DIk=
+sBAFRXBgcDTlpdU1QCBl1XUABaCFsPWF8BXFMNAAdQUgUJBFMBBVQKUgZTXANTVFcdUAZCC19XA=
+xEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC0lNVVVbWxQBFxwYERRQ=
+AEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D&fl=3DCUNFQRVYHh9eXFNKEgx=
+MFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1LMklBZmg4SUJnQjZZd0IlMkJEU1poY2dZR0F=
+3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bGVncE1jWFFrUHlFNFBqVThGRkZmWGw4JTJCUH=
+hJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV0ZzNWVoRW5Qams1TGxaTVNoWWdJQ0FnQ0RNM=
+mFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdiM2glMkJhVVZLUTE4SUtqczlPQzV3Y1JCSFMw=
+WThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHBzJTNBJTJGJTJGd3d3LnRydWVjYWxsZXIuY29=
+tJTJGcHJpdmFjeSUyRnByaXZhY3ktY2VudGVyJmM9NzUxMTk4NDQ4JnRva2VuPUFWRldCUUpXQm=
+dJJTNEJnRyeT0xJiRmb2xsb3dfcmVkaXJlY3Q9dHJ1ZQ=3D=3D" style=3D"text-decoratio=
+n:none;color:#000;">Privacy</a> | <a href=3D"https://delivery.updates.truec=
+aller.com/PDQIOGUBX?id=3D125774=3DIksBAFRXBgcDTlJcV1ZXAl1RUFFUAAYMWlJUVgQHX=
+AFVAQVQUgAJBFQAAVZXAFMCUwEdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNR=
+DABVUVRcSAwWFUdCC0lNVVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25=
+bDVAdQlA=3D&fl=3DCUNFQRVYHh9eXFNKEgxMFgtXClEXXANRVUgNAREbFg=3D=3D&ext=3DZT1=
+LMklBZmg4SUJnQjZZd0IlMkJEU1poY2dZR0F3TmtZbUZ6S1NRc1BFeE9Ud2RsYUdOJTJGWTJ0bG=
+VncE1jWFFrUHlFNFBqVThGRkZmWGw4JTJCUHhJTEsyc3VMa1JWWDBBckZEMCUyRlBqdzdLRk5FV=
+0ZzNWVoRW5Qams1TGxaTVNoWWdJQ0FnQ0RNMmFRZ1NBQU52YjJwNVpHcGhmMjBDQVFaaGFtdDdi=
+M2glMkJhVVZLUTE4SUtqczlPQzV3Y1JCSFMwWThCVFl1TVRzbkowWVNUQSUzRCUzRCZyPWh0dHB=
+zJTNBJTJGJTJGd3d3LnRydWVjYWxsZXIuY29tJTJGdGVybXMtb2Ytc2VydmljZSZjPTc1MTE5OD=
+Q0OCZ0b2tlbj1CVnhWQmdKVUFnQUImdHJ5PTEmJGZvbGxvd19yZWRpcmVjdD10cnVl" style=
+=3D"text-decoration:none;color:#000;">Terms of Service</a></td>            =
+</tr>           </tbody>          </table>          </td>         </tr>    =
+    </tbody>       </table>       </td>      </tr>     </tbody>    </table>=
+    </td>   </tr>  </tbody> </table>=20=0A=
+<p style=3D"text-align: center;">Click <a href=3D"https://delivery.updates.=
+truecaller.com/PDQIOGUBX?id=3D125774=3DNEsBAFRXBgcDTkJERUUWREQUQRRDEUIYGUZD=
+REUUREJBFxERRkIREBcSQkRFRRZERAQdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFk=
+BVQNRDABVUVRcSAwWFUdCC0lNVVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LS=
+MwJ25bDVAdQlA=3D">here</a> to unsubscribe</p>=0A=
+=0A=
+<img id=3D'SBBBB' src=3D'https://delivery.updates.truecaller.com/PDQIOGUBX?=
+id=3D125774=3DLksBAFRXBgcDTkJERUUWREQUQRRDEUIYGUZDREUUREJBFxERRkIREBcSQkRFR=
+RZERAQdUAZCC19XAxEMBEMPU1N3VlwHC10eVF0PGFRSDlxcBFkBVQNRDABVUVRcSAwWFUdCC0lN=
+VVVbWxQBFxwYERRQAEAGQkxMSxMGBwRYCAcTGVJeC01hdGZ7LSMwJ25bDVAdQlA=3D' /></bod=
+y> </html> </!doctype><img  alt=3D"" border=3D"0" height=3D"1" width=3D"1" =
+src=3D"https://in1.wizrocketmail.net/r?e=3DK2IAfh8IBgB6YwB%2BDSZhcgYGAwNkYm=
+FzKSQsPExOTwdlaGN%2FY2tlegpMcXQkPyE4PjU8FFFfXl8%2BPxILK2suLkRVX0ArFD0%2FPjw=
+7KFNEWFs5egQiMi03L05LE0MtKDkUPj5wcRABBgxiYmB4Z2lmFAAAAwJnY2JzdXZwPEhCWmsnMy=
+QkI3hoaUVKQ18IPjctNi8%2BPxBN&c=3D765597824"></img>=0A=
+
+
+------=_Part_312756_1698305396.1788840638320--

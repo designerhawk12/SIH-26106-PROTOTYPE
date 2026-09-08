@@ -4,6 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { UserProfile } from "@/types/auth";
 import type { InfrastructureWorkspace } from "@/types/infrastructure";
 import type {
+  AIInvestigationAction,
+  AIInvestigatorResponse,
+} from "@/types/aiInvestigator";
+import type {
   AnalysisViewModel,
   AnalyzeCaseResponse,
   AttachmentEvidence,
@@ -335,6 +339,36 @@ export async function getCase(caseId: string): Promise<AnalysisViewModel> {
     return toAnalysisView({ ...sampleAnalysis, case_id: caseId });
   }
   return toAnalysisView(await requestJson<EmailAnalysis>(`/api/v1/cases/${caseId}`));
+}
+
+export async function investigateCase(
+  caseId: string,
+  action: AIInvestigationAction,
+): Promise<AIInvestigatorResponse> {
+  return requestJson<AIInvestigatorResponse>(
+    `/api/v1/cases/${caseId}/ai/investigate`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    },
+    30_000,
+  );
+}
+
+export async function askAIInvestigator(
+  caseId: string,
+  question: string,
+): Promise<AIInvestigatorResponse> {
+  return requestJson<AIInvestigatorResponse>(
+    `/api/v1/cases/${caseId}/ai/ask`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    },
+    30_000,
+  );
 }
 
 export async function getCaseReport(caseId: string): Promise<Blob> {

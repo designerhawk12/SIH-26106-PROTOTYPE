@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 
 class Settings(BaseModel):
@@ -21,6 +21,14 @@ class Settings(BaseModel):
     supabase_url: str | None = None
     supabase_publishable_key: str | None = Field(default=None, repr=False)
     auth_timeout_seconds: float = Field(default=5.0, gt=0, le=30)
+    groq_api_key: SecretStr | None = Field(default=None, repr=False)
+    groq_model: str = Field(
+        default="openai/gpt-oss-20b",
+        min_length=1,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9._/-]+$",
+    )
+    groq_timeout_seconds: float = Field(default=60.0, gt=0, le=60)
     max_upload_bytes: int = Field(default=26_214_400, gt=0)
 
     allowed_origins: tuple[str, ...] = (
@@ -62,6 +70,11 @@ class Settings(BaseModel):
             supabase_url=os.getenv("SUPABASE_URL") or None,
             supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY") or None,
             auth_timeout_seconds=float(os.getenv("AUTH_TIMEOUT_SECONDS", "5")),
+            groq_api_key=(
+                SecretStr(value) if (value := os.getenv("GROQ_API_KEY")) else None
+            ),
+            groq_model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
+            groq_timeout_seconds=float(os.getenv("GROQ_TIMEOUT_SECONDS", "60")),
             max_upload_bytes=int(os.getenv("MAX_UPLOAD_BYTES", "26214400")),
             allowed_origins=origins,
         )

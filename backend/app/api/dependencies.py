@@ -23,6 +23,8 @@ from ..services.auth import (
     role_has_permission,
 )
 from ..services.auth.factory import build_identity_verifier
+from ..services.ai_investigator.factory import build_ai_investigator_service
+from ..services.ai_investigator.interfaces import AIInvestigatorService
 from ..services.orchestrator.factory import build_default_analysis_orchestrator
 from ..services.orchestrator.interfaces import AnalysisOrchestrator
 from ..services.reporting.factory import build_reporting_service
@@ -120,6 +122,17 @@ def get_analysis_orchestrator(request: Request) -> AnalysisOrchestrator:
         )
         request.app.state.analysis_orchestrator = orchestrator
     return orchestrator
+
+
+def get_ai_investigator_service(request: Request) -> AIInvestigatorService:
+    investigator = cast(
+        AIInvestigatorService | None,
+        getattr(request.app.state, "ai_investigator_service", None),
+    )
+    if investigator is None:
+        investigator = build_ai_investigator_service(get_runtime_settings(request))
+        request.app.state.ai_investigator_service = investigator
+    return investigator
 
 
 def get_reporting_service(request: Request) -> ReportingService:
