@@ -18,10 +18,18 @@ services:
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-20b}
       GROQ_TIMEOUT_SECONDS: ${GROQ_TIMEOUT_SECONDS:-60}
+
+      # Gmail OAuth
+      GMAIL_CREDENTIALS_FILE: /app/secrets/credentials.json
+      GMAIL_TOKEN_FILE: /app/secrets/token.json
+
     ports:
       - "${BACKEND_PORT:-8000}:8000"
+
     volumes:
       - backend-data:/data
+      - ./secrets:/app/secrets
+
     healthcheck:
       test:
         - CMD
@@ -32,8 +40,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
     security_opt:
       - no-new-privileges:true
+
     restart: unless-stopped
 
   frontend:
@@ -45,15 +55,19 @@ services:
         VITE_USE_MOCK_API: ${VITE_USE_MOCK_API:-false}
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
         VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+
     environment:
       HOST: 0.0.0.0
       PORT: 3000
       NODE_ENV: production
+
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
+
     depends_on:
       backend:
         condition: service_healthy
+
     healthcheck:
       test:
         - CMD
@@ -64,8 +78,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
     security_opt:
       - no-new-privileges:true
+
     restart: unless-stopped
 
 volumes:

@@ -15,6 +15,7 @@ from .app.api import (
     ai_investigator_router,
     auth_router,
     cases_router,
+    extension_router,
     health_router,
     infrastructure_router,
     system_router,
@@ -82,8 +83,8 @@ def create_app(
     application.include_router(threat_intelligence_router)
     application.include_router(infrastructure_router)
     application.include_router(system_router)
+    application.include_router(extension_router)
     return application
 
 
 app = create_app()
-

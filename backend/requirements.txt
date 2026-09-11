@@ -10,6 +10,12 @@ psycopg[binary]==3.3.5
 python-multipart==0.0.20
 reportlab==4.4.9
 
+# Gmail API / OAuth
+google-api-python-client==2.186.0
+google-auth==2.41.1
+google-auth-oauthlib==1.2.2
+google-auth-httplib2==0.2.0
+
 # API test dependencies
 httpx==0.28.1
 pytest==8.4.1

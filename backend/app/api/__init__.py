@@ -1,9 +1,10 @@
-"""Versioned API transport package."""
+"""API package."""
 
 from .routes import (
     ai_investigator_router,
     auth_router,
     cases_router,
+    extension_router,
     health_router,
     infrastructure_router,
     system_router,
@@ -16,6 +17,7 @@ __all__ = [
     "ai_investigator_router",
     "auth_router",
     "cases_router",
+    "extension_router",
     "health_router",
     "infrastructure_router",
     "system_router",
@@ -23,4 +25,3 @@ __all__ = [
     "watchlist_router",
     "workflow_cases_router",
 ]
-

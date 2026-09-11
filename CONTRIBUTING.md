@@ -9,6 +9,7 @@ This repository is organized for five developers working concurrently. Respect t
 | Developer 3 | `backend/app/services/detection/**`, `backend/app/services/risk/**`, `backend/tests/detection/**`, `backend/tests/risk/**` |
 | Developer 4 | `backend/app/services/threat_intel/**`, `backend/app/services/geolocation/**`, `backend/tests/threat_intel/**`, `backend/tests/geolocation/**` |
 | Developer 5 | `frontend/**` |
+| Extension Integration | `extension/**`, `backend/app/services/extension_gmail/**` |
 
 `backend/app/schemas/**`, `docs/contracts/**`, root documentation, and configuration examples are shared contracts. Changes to them require team review because they can affect every workstream.
 
@@ -28,10 +29,12 @@ This repository is organized for five developers working concurrently. Respect t
 - Never render untrusted HTML. A future UI must sanitize into a separate derived representation or display it as escaped text.
 - Use generated storage identifiers and a fixed evidence root; never derive file paths from user-supplied names.
 - Validate media type, extension, size, and message structure at the upload boundary.
-- Read provider credentials only from environment variables, redact them from errors, and never log them.
+- Read provider credentials only from environment variables or explicitly configured local secret files, redact them from errors, and never log them.
+- Gmail OAuth client credentials and generated tokens must remain outside version control and be provided through the local `secrets/` mount; never commit `credentials.json` or `token.json`.
 - Convert provider failures and absent reputation into `UNKNOWN`; absence of evidence is not a `BENIGN` verdict.
 
 ## Pull requests
 
 Keep changes scoped to one owner's paths when possible. Call out shared-contract changes, migrations, new dependencies, external network behavior, and security-impacting decisions in the pull request description.
 
+The Gmail API/OAuth integration is an external-networking dependency and must be called out in the pull request description.
