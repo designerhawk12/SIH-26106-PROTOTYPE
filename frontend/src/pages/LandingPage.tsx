@@ -1,10 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { Fingerprint, Globe2, ScanLine, Sparkles } from "lucide-react";
-import { CursorGlow } from "@/components/effects/CursorGlow";
-import { ActionButton } from "@/components/ui/ActionButton";
-import { CyberBlocks } from "@/components/ui/CyberBlocks";
-import { Panel } from "@/components/ui/Panel";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  ArrowDown,
+  ArrowUpRight,
+  ArrowRight,
+  Fingerprint,
+  Globe2,
+  ScanLine,
+  Sparkles,
+} from "lucide-react";
+import { HeroScene } from "@/components/landing/HeroScene";
+import { LandingCursorLight } from "@/components/landing/LandingCursorLight";
+import "@/components/landing/landing.css";
 
 const capabilities = [
   {
@@ -30,72 +37,126 @@ const capabilities = [
 ];
 
 export function LandingPage() {
+  const reduced = useReducedMotion();
+  const reveal = (delay: number) => ({
+    initial: { opacity: 0, y: reduced ? 0 : 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: reduced ? 0 : 0.75,
+      delay: reduced ? 0 : delay,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  });
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-background">
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
-      <div className="pointer-events-none absolute left-1/2 top-[-160px] h-[620px] w-[1100px] -translate-x-1/2 rounded-full bg-accent/[0.06] blur-[160px]" />
-      <CursorGlow />
-
-      <div className="relative z-10 mx-auto max-w-[1200px] px-6 py-10">
-        <header className="flex items-center justify-between">
-          <p className="text-sm font-bold tracking-tight">SENTINEL MX</p>
-          <Link to="/dashboard">
-            <ActionButton variant="secondary" arrow>
-              Open Console
-            </ActionButton>
-          </Link>
-        </header>
-
-        <section className="grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr]">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-              AI-Powered Email Threat Detection
-            </p>
-            <h1 className="mt-5 text-5xl font-bold leading-[0.98] tracking-tight lg:text-7xl">
-              Forensic
-              <br />
-              intelligence for
-              <br />
-              <span className="text-accent text-accent-glow">email threats</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Submit suspicious messages, expose authentication failures, map observed routing
-              infrastructure and document every finding as defensible investigation evidence.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/analyze">
-                <ActionButton arrow>Analyze Email</ActionButton>
-              </Link>
-              <Link to="/dashboard">
-                <ActionButton variant="secondary">View Dashboard</ActionButton>
-              </Link>
+    <div className="sentinel-landing">
+      <LandingCursorLight />
+      <a href="#landing-main" className="landing-skip">
+        Skip to content
+      </a>
+      <header className="landing-header landing-container">
+        <Link to="/" className="landing-brand" aria-label="Sentinel MX home">
+          <span className="landing-brand-mark" aria-hidden="true">
+            <ScanLine size={19} strokeWidth={1.7} />
+          </span>
+          SENTINEL <span>MX</span>
+        </Link>
+        <nav aria-label="Homepage navigation" className="landing-nav">
+          <a href="#capabilities">
+            Platform capabilities <ArrowDown size={12} />
+          </a>
+        </nav>
+        <Link to="/dashboard" className="landing-button landing-button-primary landing-console">
+          Open Console <ArrowUpRight size={15} />
+        </Link>
+      </header>
+      <main id="landing-main">
+        <section className="landing-hero landing-container" aria-labelledby="hero-title">
+          <div className="landing-hero-grid">
+            <div className="landing-copy">
+              <motion.p {...reveal(0.05)} className="landing-eyebrow">
+                <span /> AI-POWERED EMAIL THREAT DETECTION
+              </motion.p>
+              <motion.h1 {...reveal(0.13)} id="hero-title">
+                Forensic
+                <br />
+                intelligence for
+                <br />
+                <span>email threats</span>
+              </motion.h1>
+              <motion.p {...reveal(0.21)} className="landing-description">
+                Submit suspicious messages, expose authentication failures, map observed routing
+                infrastructure and document every finding as defensible investigation evidence.
+              </motion.p>
             </div>
-          </motion.div>
-
-          <CyberBlocks className="mx-auto h-[min(360px,86vw)] w-[min(360px,86vw)]" />
-        </section>
-
-        <section className="grid gap-4 pb-24 sm:grid-cols-2 lg:grid-cols-4">
-          {capabilities.map((item, i) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.1 + i * 0.07 }}
-            >
-              <Panel interactive spotlight tilt className="h-full p-5">
-                <item.icon className="h-4 w-4 text-accent" />
-                <p className="mt-4 text-sm font-semibold">{item.title}</p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.body}</p>
-              </Panel>
+            <div className="landing-visual">
+              <HeroScene />
+            </div>
+            <motion.div {...reveal(0.29)} className="landing-actions">
+              <Link to="/analyze" className="landing-button landing-button-primary">
+                Analyze Email <ArrowRight size={16} />
+              </Link>
+              <Link to="/dashboard" className="landing-button landing-button-secondary">
+                View Dashboard <ArrowUpRight size={15} />
+              </Link>
             </motion.div>
-          ))}
+          </div>
+          <div className="landing-statement">
+            <span className="landing-section-number">01 / THE PLATFORM</span>
+            <p>
+              <span>Deterministic forensics.</span> Threat intelligence.
+              <br className="landing-statement-break" /> AI-assisted investigation.
+            </p>
+            <a href="#capabilities" aria-label="Explore platform capabilities">
+              <ArrowDown size={20} />
+            </a>
+          </div>
         </section>
-      </div>
+        <section
+          id="capabilities"
+          className="landing-capabilities landing-container"
+          aria-labelledby="capabilities-title"
+        >
+          <div className="landing-section-heading">
+            <div>
+              <p className="landing-eyebrow">FROM MESSAGE TO EVIDENCE</p>
+              <h2 id="capabilities-title">
+                Every signal.
+                <br />
+                <span>A clearer investigation.</span>
+              </h2>
+            </div>
+            <p>
+              Inspect the message. Connect the signals.
+              <br />
+              Keep the evidence intact.
+            </p>
+          </div>
+          <div className="landing-card-grid">
+            {capabilities.map((item, i) => (
+              <motion.article
+                key={item.title}
+                className="landing-feature-card"
+                initial={{ opacity: 0, y: reduced ? 0 : 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: reduced ? 0 : 0.5, delay: reduced ? 0 : i * 0.07 }}
+              >
+                <div className="landing-card-top">
+                  <item.icon size={21} strokeWidth={1.5} />
+                  <span>0{i + 1}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+      </main>
+      <footer className="landing-footer landing-container">
+        <span>SENTINEL MX</span>
+        <p>Email threat detection &amp; forensic intelligence</p>
+        <a href="#landing-main">Back to top ↑</a>
+      </footer>
     </div>
   );
 }

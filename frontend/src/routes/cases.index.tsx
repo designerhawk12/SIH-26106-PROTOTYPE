@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DemoModuleGate } from "@/components/demo/UnderDevelopmentPage";
 import { AppShell } from "@/components/layout/AppShell";
 import { CasesPage } from "@/pages/CasesPage";
 
@@ -17,7 +18,9 @@ export const Route = createFileRoute("/cases/")({
   }),
   component: () => (
     <AppShell>
-      <CasesPage />
+      <DemoModuleGate moduleName="Investigations">
+        <CasesPage />
+      </DemoModuleGate>
     </AppShell>
   ),
 });

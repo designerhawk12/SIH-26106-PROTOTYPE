@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DemoModuleGate } from "@/components/demo/UnderDevelopmentPage";
 import { AppShell } from "@/components/layout/AppShell";
 import { ThreatIntelligencePage } from "@/pages/ThreatIntelligencePage";
 
@@ -17,7 +18,9 @@ export const Route = createFileRoute("/threat-intelligence")({
   }),
   component: () => (
     <AppShell>
-      <ThreatIntelligencePage />
+      <DemoModuleGate moduleName="Threat Intelligence">
+        <ThreatIntelligencePage />
+      </DemoModuleGate>
     </AppShell>
   ),
 });
