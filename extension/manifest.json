@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Email Forensics Shield",
+  "version": "1.0.0",
+  "description": "SIH26106 - Email threat detection prototype",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "host_permissions": ["http://127.0.0.1:8000/*"],
+  "permissions": []
+}

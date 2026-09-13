@@ -5,9 +5,9 @@ from ..detection import DeterministicDetectionService
 from ..email_forensics import EmailForensicsParser
 from ..geolocation import (
     DemoInfrastructureGeoProvider,
-    IpWhoIsProvider,
     ObservedInfrastructureGeoService,
 )
+from ..geolocation.ipapi import IpApiProvider
 from ..risk import DeterministicRiskEngine
 from ..threat_intel import (
     AbuseIPDBProvider,
@@ -34,14 +34,18 @@ def build_default_analysis_orchestrator(
     """
 
     runtime_settings = settings or get_settings()
+
     if runtime_settings.demo_mode:
         threat_intel = ThreatIntelEnrichmentService(
             providers=(DemoThreatIntelProvider(),)
         )
+
         geolocation = ObservedInfrastructureGeoService(
             provider=DemoInfrastructureGeoProvider()
         )
+
         mode_warnings = (DEMO_MODE_WARNING,)
+
     else:
         threat_intel = ThreatIntelEnrichmentService(
             providers=(
@@ -49,7 +53,11 @@ def build_default_analysis_orchestrator(
                 VirusTotalProvider.from_environment(),
             )
         )
-        geolocation = ObservedInfrastructureGeoService(provider=IpWhoIsProvider())
+
+        geolocation = ObservedInfrastructureGeoService(
+            provider=IpApiProvider()
+        )
+
         mode_warnings = ()
 
     return AnalysisPipelineOrchestrator(
